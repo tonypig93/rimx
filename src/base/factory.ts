@@ -1,15 +1,13 @@
-import { Subject } from 'rxjs/Subject';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import 'rxjs/add/operator/pluck';
-import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/finally';
-import 'rxjs/add/operator/takeUntil';
-import Immutable from 'immutable';
+import * as Immutable from 'immutable';
 
-import ControlledSubject from './controlled-subject';
+import { ControlledSubject } from './controlled-subject';
 
 export class RxStoreFactory {
+  store: BehaviorSubject<Immutable.Map<string, any>>;
+  scopeId: number;
+  observers: Immutable.List<any>;
   constructor() {
     this.store = new BehaviorSubject(Immutable.Map());
     this.scopeId = 1;
@@ -32,7 +30,7 @@ export class RxStoreFactory {
    * @param {object} state
    * @memberof RxStoreFactory
    */
-  updateScope(path, state) {
+  updateScope(path: string, state) {
     let nextState;
     const subscription = this.store.subscribe({
       next: (rootState) => {
@@ -64,7 +62,7 @@ export class RxStoreFactory {
    * @param {string} path
    * @memberof RxStoreFactory
    */
-  deleteScope(path) {
+  deleteScope(path: string) {
     let nextState;
     const subscription = this.store.subscribe({
       next: (rootState) => {
@@ -83,7 +81,7 @@ export class RxStoreFactory {
    * @param {object} rootState
    * @param {object} initialState
    */
-  _processInject(path, rootState, initialState) {
+  _processInject(path: string[], rootState, initialState) {
     return rootState.mergeIn(path, initialState);
   }
   /**
@@ -108,7 +106,7 @@ export class RxStoreFactory {
    * @returns {object}
    * @memberof RxStoreFactory
    */
-  findScopeObservers(scopeId) {
+  findScopeObservers(scopeId: number) {
     return this.observers.find((ob) => {
       if (!ob) {
         throw new Error(`cannot find the observer list of scope ${this.scopeId}`);
@@ -122,7 +120,7 @@ export class RxStoreFactory {
    * @returns {object}
    * @memberof RxStoreFactory
    */
-  _getSnapshot(pluckPath) {
+  _getSnapshot(pluckPath: string[]) {
     let snapshot;
     const subscription = this.store
       .map((rootState) => rootState.getIn(pluckPath))
@@ -138,7 +136,7 @@ export class RxStoreFactory {
    * @returns {object}
    * @memberof RxStoreFactory
    */
-  getStateSubject(path) {
+  getStateSubject(path: string) {
     const pluckPath = path.split('.');
     const scopeId = this._getSnapshot(pluckPath).get('$scopeId');// eslint-disable-line
     if (!scopeId) {

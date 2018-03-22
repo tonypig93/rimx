@@ -1,9 +1,20 @@
 /**
  * @class ControlledSubject
  */
+import { Subject } from 'rxjs/Subject';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/map';
 import { compareFn } from './utils';
 
-export default class ControlledSubject {
+export class ControlledSubject {
+  path: string;
+  pluckPath: string[];
+  root: any;
+  scopeId: number;
+  streamControl: Subject<any>;
+  closed: boolean;
+  stateObservable: Observable<any>;
     constructor(path, scopeId, root) {
       this.path = path;
       this.pluckPath = path.split('.');
@@ -14,7 +25,6 @@ export default class ControlledSubject {
       this.stateObservable = root.store
         .asObservable()
         .map((rootState) => rootState.getIn(this.pluckPath));
-      // .finally(() => console.log('your watch is over'));
     }
     /**
      *
@@ -23,7 +33,7 @@ export default class ControlledSubject {
      * @returns
      * @memberof ControlledSubject
      */
-    subscribe(observer, key, mapper) {// eslint-disable-line
+    subscribe(observer, key: string[], mapper: (ob: Observable<any>) => Observable<any>) {// eslint-disable-line
       const root = this.root;
       // root.takeSnapshot();
       let observable = this.stateObservable;

@@ -1,6 +1,7 @@
 const webpack = require("webpack");
+
 module.exports = {
-  entry: "./src/index.js",
+  entry: "./src/index.tsx",
   output: {
     filename: "rimx.js",
     path: __dirname + "/dist",
@@ -22,22 +23,35 @@ module.exports = {
     },
     "rxjs/BehaviorSubject",
     "rxjs/Subject",
-    "rxjs/add/operator/pluck",
     "rxjs/add/operator/distinctUntilChanged",
     "rxjs/add/operator/map",
-    "rxjs/add/operator/finally",
-    "rxjs/add/operator/takeUntil"
   ],
   module: {
     rules: [
       {
-        test: /\.js$/,
-        loader: "babel-loader",
+        test: /\.(ts|tsx)$/,
+        loader: "ts-loader",
+        options: {
+          compilerOptions: {
+            module: 'es2015'
+          }
+        }
       }
     ]
   },
   resolve: {
-    modules: ["node_modules"]
+    modules: ["node_modules"],
+    extensions: [
+      '.web.ts',
+      '.ts',
+      '.web.tsx',
+      '.tsx',
+      '.web.js',
+      '.js',
+      '.json',
+      '.web.jsx',
+      '.jsx',
+    ],
   },
   plugins: [
   ]

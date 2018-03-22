@@ -1,10 +1,16 @@
-import React from 'react';
+import * as React from 'react';
+import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Observable';
+
 import { isPlainObject, toCamelcase } from './utils';
 import { RxStoreFactory } from './base/factory';
+import { ControlledSubject } from './base/controlled-subject';
 
+interface ReactSubject extends ControlledSubject {
+  listen?: (observer, key: string[], mapper: (ob: Observable<any>) => Observable<any>) => Subscription;
+}
 
 export const RxStore = new RxStoreFactory();
-
 
 /**
  * 宿主组件：创建scope的组件；连接组件：连接到其他宿主组件的scope的组件。
@@ -18,18 +24,19 @@ export const RxStore = new RxStoreFactory();
  * @param {any} connectScopes
  * @returns
  */
-export function connect(scopeName, initState, connectScopes) {
+export function connect(scopeName: any, initState, connectScopes) {
   return function wrap(WrapComponent) {
-    return class WrappedComponent extends React.PureComponent {
-      constructor() {
-        super();
-        this.subject = null;
-        this.state = {};
-        this.listeners = [];
-        this.isConnected = false;
-        this.stateToPropsNames = [];
+    return class WrappedComponent extends React.PureComponent<any, any> {
+      subject: { [key: string]: ReactSubject } = {};
+      state = {};
+      listeners: Subscription[] = [];
+      isConnected = false;
+      stateToPropsNames: string[] = [];
+      connectOptions: any;
+      constructor(p, s) {
+        super(p, s);
         if (typeof scopeName === 'string') {
-          this.createScope();
+          this.createScope(scopeName);
         }
         if (isPlainObject(scopeName) || isPlainObject(connectScopes)) {
           this.connectOptions = isPlainObject(scopeName) ? scopeName : connectScopes;
@@ -40,25 +47,14 @@ export function connect(scopeName, initState, connectScopes) {
       componentWillMount() {
         this.mapStateToProps(this.subject);
       }
-      get debugID() {
-        return this._reactInternalInstance._debugID; //eslint-disable-line
-      }
-      createScope() { //eslint-disable-line
-        RxStore.injectScope(scopeName, initState);
-        this.subject = this.bindListener(RxStore.getStateSubject(scopeName));
-        this.isScopeHoster = true;
+      createScope(name: string) {
+        RxStore.injectScope(name, initState);
+        this.subject[name] = this.bindListener(RxStore.getStateSubject(name));
       }
       connectScope(scopes) {
-        if (this.subject) {
-          this.subject = {
-            [scopeName]: this.subject,
-          };
-        } else {
-          this.subject = {};
-        }
         Object.keys(scopes).filter((key) => key !== scopeName).forEach((key) => {
-          const _subject = RxStore.getStateSubject(key);//eslint-disable-line
-          this.subject[key] = this.bindListener(_subject);
+          const _subject = RxStore.getStateSubject(key);
+          this.subject[key] = this.bindListener(_subject)
         });
       }
       componentWillUnmount() {
@@ -66,10 +62,10 @@ export function connect(scopeName, initState, connectScopes) {
           listener.unsubscribe();
         });
       }
-      bindListener(subject) {
-        const bindedSubject = subject;
-        bindedSubject.listen = (observer, k, mapper) => {
-          const subscription = subject.subscribe(observer, k, mapper);
+      bindListener(subject: ControlledSubject) {
+        const bindedSubject: ReactSubject = subject;
+        bindedSubject.listen = (observer, key, mapper) => {
+          const subscription = subject.subscribe(observer, key, mapper);
           this.listeners.push(subscription);
           return subscription;
         };
@@ -111,8 +107,12 @@ export function connect(scopeName, initState, connectScopes) {
         });
         return props;
       }
-      getSubject(scopeName) {
-        
+      getSubject() {
+        if (this.isConnected) {
+          return this.subject;
+        } else {
+          return this.subject[scopeName];
+        }
       }
       render() {
         const valueProps = this.getProps();
@@ -120,7 +120,7 @@ export function connect(scopeName, initState, connectScopes) {
           <WrapComponent
             {...this.props}
             {...valueProps}
-            subject={this.subject} />
+            subject={this.getSubject()} />
         );
       }
     };
