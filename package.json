@@ -1,6 +1,6 @@
 {
   "name": "rimx",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A state management tool for React, based on RxJS and ImmutableJS.",
   "main": "dist/rimx.js",
   "module": "src/index.js",
@@ -26,9 +26,9 @@
   "homepage": "https://github.com/tonypig93/rimx#readme",
   "dependencies": {},
   "peerDependencies": {
-    "rxjs": "^5.0.0",
+    "rxjs": "^5.5.0",
     "react": "^0.14.0 || ^15.0.0 || ^16.0.0",
-    "immutable": "^3.8.3"
+    "immutable": "^3.8.0"
   },
   "devDependencies": {
     "babel": "^6.23.0",
