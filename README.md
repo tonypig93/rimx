@@ -141,8 +141,9 @@ export default connect('order', {
 上面说过连接到`store`的组件都会获得`subject`，`subject`除了可以手动订阅状态之外，还有一个最重要的功能，就是改变状态。
 ```
 class OrderList extends React.Component {
-  handleClick() {
-    this.props.subject.next((data) => data.set('username', 'Daddy'))
+  handleClick = () => {
+    this.props.subject['order'].next((data) => data.set('username', 'Daddy'));
+    // 连接组件需要通过指定`scope`来获取对应的`subject`，纯宿主组件可以直接使用`subject`
   }
   render() {
     return (
