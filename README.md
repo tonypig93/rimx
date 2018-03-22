@@ -2,18 +2,22 @@
 A state management tool for React, based on RxJS and ImmutableJS.
 
 `RimX`是一个类似`redux`的状态管理工具，不同的是`RimX`没有`action` `reducer`等概念，使用起来较为简单。你可以利用`RxJS`强大的流处理能力来管理`react`组件的状态变化，另一方面`ImmutableJS`可以在最大限度上保证状态之间的独立性，防止因某一状态改变时引起其他不相干组件的更新。
-
-# 基础概念
-`RimX`会创建一个全局唯一的`store`，所有的状态都存储在`store`中。为保证模块之间的独立性，你需要在`store`中创建不同的域`scope`，然后需要用到该`scope`的组件就可以通过`connect`连接到该`scope`，获得`scope`中状态的实时响应。你既可以将`scope`的状态映射到`props`中，也可以手动订阅某个状态，利用`RxJS`操作符实现更复杂的逻辑。
+`RimX`本身是个小巧的库，`gzip`后仅3KB。`RimX`虽然运行在`react`之上，但是其底层结构完全可以被用于其他框架当中。
 
 # 依赖
-`RxJS` >= 5.0.0
-`ImmutableJS` >= 3.8.3
-需要用户自行安装以上两个库
+- `RxJS` >= 5.5.0
+-  `ImmutableJS` >= 3.8.0
+
+需要用户自行安装以上两个库。
+
+# 基础概念
+`RimX`会创建一个全局唯一的`store`，所有的状态都存储在`store`中。为保证模块之间的独立性，你需要在`store`中创建不同的域`scope`，然后需要用到该`scope`的组件就可以通过`connect`连接到该`scope`，获得`scope`中状态的实时响应。你既可以将`scope`的状态注入到`props`中，也可以手动订阅某个状态，利用`RxJS`操作符实现更复杂的逻辑。
+
+
 # API
 
 ## connect(scopeName, initState?, connectScopes?)
-与`redux`相似，`connect`可以将你的组件与`RimX`进行连接，连接方式有两种：成为宿主组件或连接组件。
+与`redux`相似，`connect`可以将你的组件与`store`进行连接，连接方式有两种：成为宿主组件或连接组件。
 
 ## 宿主组件
 使用方法：
@@ -22,6 +26,7 @@ import React from 'react';
 import { connect } from 'rimx';
 
 class OrderPage extends React.Component { ... }
+
 export default connect('order', {
   list: [],
 })(OrderList)
@@ -34,14 +39,15 @@ export default connect('order', {
 使用方法：
 ```
 class OrderList extends React.Component { ... }
+
 export default connect({
   order: null,
 })(OrderList)
 ```
-当你传递给`connect`的第一个参数为对象时，该组件自动成为连接组件，并连接到order这个`scope`，此时你可以获得该`scope`中任何状态的变化响应。有两种方法可以获得响应：
+当你传递给`connect`的第一个参数为对象时，该组件自动成为连接组件，并连接到order这个`scope`，此时你可以选择`scope`中一个或多个状态进行响应，有两种方法可以订阅状态：
 
  ### `mapStateToProps`
- 将`scope`中的状态映射到组件的`props`当中，用法如下：
+ 将`scope`中的状态注入到组件的`props`当中，用法如下：
  ```
  export default connect({
    order: {
@@ -86,7 +92,7 @@ export default connect({
    }],
  })(OrderList)
  ```
- `OrderList`将只会响应`list`的变化，而不受其他状态的影响。
+ 其中仅订阅了`list`的`OrderList`组件将只会响应`list`的变化，而不受其他状态变化的影响。
  
  ### `listen(observer, path?, mapper?)`
  `listen`是手动订阅状态的方法。连接到`store`的组件都会获得一个名为`subject`的`prop`，`subject`其实就是对某个`scope`进行状态管理的核心实例，本质上来说`mapStateToProps`也是调用`subject`的`listen`方法。
