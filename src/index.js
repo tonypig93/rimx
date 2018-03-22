@@ -1,6 +1,6 @@
 import React from 'react';
 import { isPlainObject, toCamelcase } from './utils';
-import { RxStoreFactory } from './factory';
+import { RxStoreFactory } from './base/factory';
 
 
 export const RxStore = new RxStoreFactory();
@@ -111,10 +111,16 @@ export function connect(scopeName, initState, connectScopes) {
         });
         return props;
       }
+      getSubject(scopeName) {
+        
+      }
       render() {
         const valueProps = this.getProps();
         return (
-          <WrapComponent {...this.props} {...valueProps} subject={this.subject} />
+          <WrapComponent
+            {...this.props}
+            {...valueProps}
+            subject={this.subject} />
         );
       }
     };
