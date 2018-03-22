@@ -6,7 +6,10 @@ A state management tool for React, based on RxJS and ImmutableJS.
 # 基础概念
 `RimX`会创建一个全局唯一的`store`，所有的状态都存储在`store`中。为保证模块之间的独立性，你需要在`store`中创建不同的域`scope`，然后需要用到该`scope`的组件就可以通过`connect`连接到该`scope`，获得`scope`中状态的实时响应。你既可以将`scope`的状态映射到`props`中，也可以手动订阅某个状态，利用`RxJS`操作符实现更复杂的逻辑。
 
-
+# 依赖
+`RxJS` >= 5.0.0
+`ImmutableJS` >= 3.8.3
+需要用户自行安装以上两个库
 # API
 
 ## connect(scopeName, initState?, connectScopes?)
