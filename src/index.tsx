@@ -107,7 +107,7 @@ export function connect(scopeName: any, initState, connectScopes) {
         });
         return props;
       }
-      getSubject() {
+      getSubjectInstance() {
         if (this.isConnected) {
           return this.subject;
         } else {
@@ -120,7 +120,8 @@ export function connect(scopeName: any, initState, connectScopes) {
           <WrapComponent
             {...this.props}
             {...valueProps}
-            subject={this.getSubject()} />
+            subject={this.getSubjectInstance()}
+          />
         );
       }
     };

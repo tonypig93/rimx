@@ -1,6 +1,8 @@
 # `RimX`
 A state management tool for React, based on RxJS and ImmutableJS.
 
+`RimX` is a state management tool like `redux`, but without `action` and `reducer`, something like that. So it's much more easier
+
 `RimX`是一个类似`redux`的状态管理工具，不同的是`RimX`没有`action` `reducer`等概念，使用起来较为简单。你可以利用`RxJS`强大的流处理能力来管理`react`组件的状态变化，另一方面`ImmutableJS`可以在最大限度上保证状态之间的独立性，防止因某一状态改变时引起其他不相干组件的更新。
 `RimX`本身是个小巧的库，`gzip`后仅3KB。`RimX`虽然运行在`react`之上，但是其底层结构完全可以被用于其他框架当中。
 
@@ -9,15 +11,6 @@ A state management tool for React, based on RxJS and ImmutableJS.
 -  `ImmutableJS` >= 3.8.0
 
 需要用户自行安装以上两个库。
-
-# 安装
-```
-npm i rimx --save
-```
-或者
-```
-yarn add rimx
-```
 
 # 基础概念
 `RimX`会创建一个全局唯一的`store`，所有的状态都存储在`store`中。为保证模块之间的独立性，你需要在`store`中创建不同的域`scope`，然后需要用到该`scope`的组件就可以通过`connect`连接到该`scope`，获得`scope`中状态的实时响应。你既可以将`scope`的状态注入到`props`中，也可以手动订阅某个状态，利用`RxJS`操作符实现更复杂的逻辑。

@@ -1,12 +1,12 @@
 {
   "name": "rimx",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A state management tool for React, based on RxJS and ImmutableJS.",
   "main": "dist/rimx.js",
   "module": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack --mode development"
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",

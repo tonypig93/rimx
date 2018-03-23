@@ -13,12 +13,14 @@ module.exports = {
       react: {
         commonjs: "react",
         commonjs2: "react",
-        amd: "react"
+        amd: "react",
+        root: "react"
       },
       immutable: {
         commonjs: "immutable",
         commonjs2: "immutable",
-        amd: "immutable"
+        amd: "immutable",
+        root: "immutable"
       }
     },
     "rxjs/BehaviorSubject",
@@ -26,6 +28,9 @@ module.exports = {
     "rxjs/add/operator/distinctUntilChanged",
     "rxjs/add/operator/map",
   ],
+  optimization: {
+    minimize: false,
+  },
   module: {
     rules: [
       {
