@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 
-import { isPlainObject, toCamelcase } from './utils';
+import { isPlainObject, toCamelcase, normalizePath } from './utils';
 import { RxStoreFactory } from './base/factory';
 import { ControlledSubject } from './base/controlled-subject';
 
@@ -98,7 +98,7 @@ export function connect(scopeName: any, initState, connectScopes) {
           this.setState({
             [name]: d,
           });
-        }, path);
+        }, normalizePath(path));
       }
       getProps() {
         const props = {};
