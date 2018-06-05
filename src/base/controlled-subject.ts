@@ -1,8 +1,9 @@
 /**
  * @class ControlledSubject
  */
-import { Subject ,  Observable, BehaviorSubject } from 'rxjs';
-
+import { Subject } from 'rxjs/Subject';
+import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { compareFn } from './utils';
 
