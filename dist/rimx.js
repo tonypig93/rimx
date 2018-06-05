@@ -67,7 +67,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -86,22 +86,16 @@ module.exports = require("react");
 /* 2 */
 /***/ (function(module, exports) {
 
-module.exports = require("rxjs/add/operator/map");
+module.exports = require("rxjs/Subject");
 
 /***/ }),
 /* 3 */
 /***/ (function(module, exports) {
 
-module.exports = require("rxjs/Subject");
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
 module.exports = require("rxjs/BehaviorSubject");
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -128,19 +122,13 @@ function normalizePath(path) {
 }
 
 // EXTERNAL MODULE: external "rxjs/BehaviorSubject"
-var BehaviorSubject_ = __webpack_require__(4);
-
-// EXTERNAL MODULE: external "rxjs/add/operator/map"
-var map_ = __webpack_require__(2);
+var BehaviorSubject_ = __webpack_require__(3);
 
 // EXTERNAL MODULE: external {"commonjs2":"immutable"}
 var external_commonjs2_immutable_ = __webpack_require__(0);
 
 // EXTERNAL MODULE: external "rxjs/Subject"
-var Subject_ = __webpack_require__(3);
-
-// EXTERNAL MODULE: external "rxjs/add/operator/distinctUntilChanged"
-var distinctUntilChanged_ = __webpack_require__(6);
+var Subject_ = __webpack_require__(2);
 
 // CONCATENATED MODULE: ./src/base/utils.ts
 
@@ -161,8 +149,6 @@ function utils_compareFn(a, b) {
 /**
  * @class ControlledSubject
  */
-
-
 
 
 var controlled_subject_ControlledSubject = /** @class */ (function () {
@@ -264,7 +250,6 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
 
 
 
-
 var factory_RxStoreFactory = /** @class */ (function () {
     function RxStoreFactory() {
         this.store = new BehaviorSubject_["BehaviorSubject"](external_commonjs2_immutable_["Map"]());
@@ -289,17 +274,7 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @memberof RxStoreFactory
      */
     RxStoreFactory.prototype.updateScope = function (path, state) {
-        var _this = this;
-        var nextState;
-        var subscription = this.store.subscribe({
-            next: function (rootState) {
-                nextState = _this._processInject(path.split('.'), rootState, state); // eslint-disable-line
-            },
-            error: function (err) {
-                throw new Error(err);
-            },
-        });
-        subscription.unsubscribe();
+        var nextState = this._processInject(path.split('.'), this.store.value, state);
         this.store.next(nextState);
     };
     /**
@@ -307,15 +282,11 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * 来回切换多个component发现subscription或者observers只增不减时，需要检查组件内是否释放了资源。
      */
     RxStoreFactory.prototype.takeSnapshot = function () {
-        var _this = this;
-        var subscription = this.store.subscribe(function (d) {
-            console.group('RxStore snapshot');
-            console.log('root state: ', d.toJS());
-            console.log("subscriptions(" + _this.observers.size + "): ", _this.observers.toJS());
-            console.log("subject observers(" + _this.store.observers.length + "): ", _this.store.observers);
-            console.groupEnd();
-        });
-        subscription.unsubscribe();
+        console.group('RxStore snapshot');
+        console.log('root state: ', this.store.value.toJS());
+        console.log("subscriptions(" + this.observers.size + "): ", this.observers.toJS());
+        console.log("subject observers(" + this.store.observers.length + "): ", this.store.observers);
+        console.groupEnd();
     };
     /**
      * 删除scope
@@ -323,16 +294,7 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @memberof RxStoreFactory
      */
     RxStoreFactory.prototype.deleteScope = function (path) {
-        var nextState;
-        var subscription = this.store.subscribe({
-            next: function (rootState) {
-                nextState = rootState.deleteIn(path.split('.'));
-            },
-            error: function (err) {
-                throw new Error(err);
-            },
-        });
-        subscription.unsubscribe();
+        var nextState = this.store.value.deleteIn(path.split('.'));
         this.store.next(nextState);
     };
     /**
@@ -383,14 +345,7 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @memberof RxStoreFactory
      */
     RxStoreFactory.prototype._getSnapshot = function (pluckPath) {
-        var snapshot;
-        var subscription = this.store
-            .map(function (rootState) { return rootState.getIn(pluckPath); })
-            .subscribe(function (d) {
-            snapshot = d;
-        });
-        subscription.unsubscribe();
-        return snapshot;
+        return this.store.value.getIn(pluckPath);
     };
     /**
      * 获取scope subject
@@ -566,12 +521,6 @@ function src_connect(scopeName, initState, connectScopes) {
     };
 }
 
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports) {
-
-module.exports = require("rxjs/add/operator/distinctUntilChanged");
 
 /***/ })
 /******/ ]);
