@@ -6,21 +6,15 @@ module.exports = {
     filename: "rimx.js",
     path: __dirname + "/dist",
     library: 'RimX',
-    libraryTarget: "umd"
+    libraryTarget: "commonjs2"
   },
   externals: [
     {
       react: {
-        commonjs: "react",
         commonjs2: "react",
-        amd: "react",
-        root: "react"
       },
       immutable: {
-        commonjs: "immutable",
         commonjs2: "immutable",
-        amd: "immutable",
-        root: "immutable"
       }
     },
     "rxjs/BehaviorSubject",

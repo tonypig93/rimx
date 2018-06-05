@@ -1,10 +1,9 @@
 /**
  * @class ControlledSubject
  */
-import { Subject } from 'rxjs/Subject';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/distinctUntilChanged';
-import 'rxjs/add/operator/map';
+import { Subject ,  Observable, BehaviorSubject } from 'rxjs';
+
+
 import { compareFn } from './utils';
 
 export class ControlledSubject {
@@ -15,7 +14,7 @@ export class ControlledSubject {
   streamControl: Subject<any>;
   closed: boolean;
   stateObservable: Observable<any>;
-    constructor(path, scopeId, root) {
+    constructor(path: string, scopeId: number, root) {
       this.path = path;
       this.pluckPath = path.split('.');
       this.root = root;

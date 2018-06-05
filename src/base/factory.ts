@@ -1,5 +1,5 @@
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import 'rxjs/add/operator/map';
+import { BehaviorSubject } from 'rxjs';
+
 import * as Immutable from 'immutable';
 
 import { ControlledSubject } from './controlled-subject';
@@ -31,16 +31,7 @@ export class RxStoreFactory {
    * @memberof RxStoreFactory
    */
   updateScope(path: string, state) {
-    let nextState;
-    const subscription = this.store.subscribe({
-      next: (rootState) => {
-        nextState = this._processInject(path.split('.'), rootState, state); // eslint-disable-line
-      },
-      error: (err) => {
-        throw new Error(err);
-      },
-    });
-    subscription.unsubscribe();
+    const nextState = this._processInject(path.split('.'), this.store.value, state);
     this.store.next(nextState);
   }
   /**
@@ -48,14 +39,11 @@ export class RxStoreFactory {
    * 来回切换多个component发现subscription或者observers只增不减时，需要检查组件内是否释放了资源。
    */
   takeSnapshot() {
-    const subscription = this.store.subscribe((d) => {
-      console.group('RxStore snapshot');
-      console.log('root state: ', d.toJS());
-      console.log(`subscriptions(${this.observers.size}): `, this.observers.toJS());
-      console.log(`subject observers(${this.store.observers.length}): `, this.store.observers);
-      console.groupEnd();
-    });
-    subscription.unsubscribe();
+    console.group('RxStore snapshot');
+    console.log('root state: ', this.store.value.toJS());
+    console.log(`subscriptions(${this.observers.size}): `, this.observers.toJS());
+    console.log(`subject observers(${this.store.observers.length}): `, this.store.observers);
+    console.groupEnd();
   }
   /**
    * 删除scope
@@ -63,16 +51,7 @@ export class RxStoreFactory {
    * @memberof RxStoreFactory
    */
   deleteScope(path: string) {
-    let nextState;
-    const subscription = this.store.subscribe({
-      next: (rootState) => {
-        nextState = rootState.deleteIn(path.split('.'));
-      },
-      error: (err) => {
-        throw new Error(err);
-      },
-    });
-    subscription.unsubscribe();
+    const nextState = this.store.value.deleteIn(path.split('.'));
     this.store.next(nextState);
   }
   /**
@@ -121,14 +100,7 @@ export class RxStoreFactory {
    * @memberof RxStoreFactory
    */
   _getSnapshot(pluckPath: string[]) {
-    let snapshot;
-    const subscription = this.store
-      .map((rootState) => rootState.getIn(pluckPath))
-      .subscribe((d) => {
-        snapshot = d;
-      });
-    subscription.unsubscribe();
-    return snapshot;
+    return this.store.value.getIn(pluckPath);
   }
   /**
    * 获取scope subject

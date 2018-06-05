@@ -1,14 +1,5 @@
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("immutable"), require("react"), require("rxjs/add/operator/map"), require("rxjs/Subject"), require("rxjs/BehaviorSubject"), require("rxjs/add/operator/distinctUntilChanged"));
-	else if(typeof define === 'function' && define.amd)
-		define(["immutable", "react", "rxjs/add/operator/map", "rxjs/Subject", "rxjs/BehaviorSubject", "rxjs/add/operator/distinctUntilChanged"], factory);
-	else if(typeof exports === 'object')
-		exports["RimX"] = factory(require("immutable"), require("react"), require("rxjs/add/operator/map"), require("rxjs/Subject"), require("rxjs/BehaviorSubject"), require("rxjs/add/operator/distinctUntilChanged"));
-	else
-		root["RimX"] = factory(root["immutable"], root["react"], root["rxjs/add/operator/map"], root["rxjs/Subject"], root["rxjs/BehaviorSubject"], root["rxjs/add/operator/distinctUntilChanged"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__0__, __WEBPACK_EXTERNAL_MODULE__1__, __WEBPACK_EXTERNAL_MODULE__2__, __WEBPACK_EXTERNAL_MODULE__3__, __WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__6__) {
-return /******/ (function(modules) { // webpackBootstrap
+module.exports =
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -83,31 +74,31 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__0__;
+module.exports = require("immutable");
 
 /***/ }),
 /* 1 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__1__;
+module.exports = require("react");
 
 /***/ }),
 /* 2 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__2__;
+module.exports = require("rxjs/add/operator/map");
 
 /***/ }),
 /* 3 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__3__;
+module.exports = require("rxjs/Subject");
 
 /***/ }),
 /* 4 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__4__;
+module.exports = require("rxjs/BehaviorSubject");
 
 /***/ }),
 /* 5 */
@@ -116,8 +107,8 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__4__;
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 
-// EXTERNAL MODULE: external {"commonjs":"react","commonjs2":"react","amd":"react","root":"react"}
-var external_commonjs_react_commonjs2_react_amd_react_root_react_ = __webpack_require__(1);
+// EXTERNAL MODULE: external {"commonjs2":"react"}
+var external_commonjs2_react_ = __webpack_require__(1);
 
 // CONCATENATED MODULE: ./src/utils.ts
 function isPlainObject(value) {
@@ -126,6 +117,15 @@ function isPlainObject(value) {
 function toCamelcase(value) {
     return value.replace(/-([a-z])/ig, function (all, letter) { return letter.toUpperCase(); });
 }
+function normalizePath(path) {
+    if (Array.isArray(path)) {
+        return path;
+    }
+    if (typeof path === 'string') {
+        return path.split('.');
+    }
+    throw new Error('invalid path type');
+}
 
 // EXTERNAL MODULE: external "rxjs/BehaviorSubject"
 var BehaviorSubject_ = __webpack_require__(4);
@@ -133,8 +133,8 @@ var BehaviorSubject_ = __webpack_require__(4);
 // EXTERNAL MODULE: external "rxjs/add/operator/map"
 var map_ = __webpack_require__(2);
 
-// EXTERNAL MODULE: external {"commonjs":"immutable","commonjs2":"immutable","amd":"immutable","root":"immutable"}
-var external_commonjs_immutable_commonjs2_immutable_amd_immutable_root_immutable_ = __webpack_require__(0);
+// EXTERNAL MODULE: external {"commonjs2":"immutable"}
+var external_commonjs2_immutable_ = __webpack_require__(0);
 
 // EXTERNAL MODULE: external "rxjs/Subject"
 var Subject_ = __webpack_require__(3);
@@ -154,7 +154,7 @@ function utils_compareFn(a, b) {
     if (utils_isNativeType(a) && utils_isNativeType(b)) {
         return a === b;
     }
-    return Object(external_commonjs_immutable_commonjs2_immutable_amd_immutable_root_immutable_["is"])(a, b);
+    return Object(external_commonjs2_immutable_["is"])(a, b);
 }
 
 // CONCATENATED MODULE: ./src/base/controlled-subject.ts
@@ -267,9 +267,9 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
 
 var factory_RxStoreFactory = /** @class */ (function () {
     function RxStoreFactory() {
-        this.store = new BehaviorSubject_["BehaviorSubject"](external_commonjs_immutable_commonjs2_immutable_amd_immutable_root_immutable_["Map"]());
+        this.store = new BehaviorSubject_["BehaviorSubject"](external_commonjs2_immutable_["Map"]());
         this.scopeId = 1;
-        this.observers = external_commonjs_immutable_commonjs2_immutable_amd_immutable_root_immutable_["List"]([]);
+        this.observers = external_commonjs2_immutable_["List"]([]);
     }
     /**
      * 注入新的scope
@@ -539,7 +539,7 @@ function src_connect(scopeName, initState, connectScopes) {
                         _a[name] = d,
                         _a));
                     var _a;
-                }, path);
+                }, normalizePath(path));
             };
             WrappedComponent.prototype.getProps = function () {
                 var _this = this;
@@ -559,10 +559,10 @@ function src_connect(scopeName, initState, connectScopes) {
             };
             WrappedComponent.prototype.render = function () {
                 var valueProps = this.getProps();
-                return (external_commonjs_react_commonjs2_react_amd_react_root_react_["createElement"](WrapComponent, src_assign({}, this.props, valueProps, { subject: this.getSubjectInstance() })));
+                return (external_commonjs2_react_["createElement"](WrapComponent, src_assign({}, this.props, valueProps, { subject: this.getSubjectInstance() })));
             };
             return WrappedComponent;
-        }(external_commonjs_react_commonjs2_react_amd_react_root_react_["PureComponent"]));
+        }(external_commonjs2_react_["PureComponent"]));
     };
 }
 
@@ -571,8 +571,7 @@ function src_connect(scopeName, initState, connectScopes) {
 /* 6 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__6__;
+module.exports = require("rxjs/add/operator/distinctUntilChanged");
 
 /***/ })
 /******/ ]);
-});
