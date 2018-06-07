@@ -4,7 +4,8 @@
 import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/distinctUntilChanged';
 import { compareFn } from './utils';
 
 export class ControlledSubject {
