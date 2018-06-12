@@ -90,7 +90,7 @@ export class ControlledSubject {
     }
   
     dispatch(action: Action) {
-      const reducer = this.root.SCOPE[this.path];
+      const reducer = this.root.SCOPE[this.path].reducer;
       this.next(state => reducer(state, action));
     }
   

@@ -632,7 +632,7 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         }
     };
     ControlledSubject.prototype.dispatch = function (action) {
-        var reducer = this.root.SCOPE[this.path];
+        var reducer = this.root.SCOPE[this.path].reducer;
         this.next(function (state) { return reducer(state, action); });
     };
     ControlledSubject.prototype.snapshot = function () {
