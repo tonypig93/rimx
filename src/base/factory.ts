@@ -3,11 +3,19 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import * as Immutable from 'immutable';
 
 import { ControlledSubject } from './controlled-subject';
+import { Reducer } from './types';
+
+interface SCOPE {
+  [path: string]: {
+    reducer: Reducer;
+  };
+}
 
 export class RxStoreFactory {
   store: BehaviorSubject<Immutable.Map<string, any>>;
   scopeId: number;
   observers: Immutable.List<any>;
+  SCOPE: SCOPE = {};
   constructor() {
     this.store = new BehaviorSubject(Immutable.Map());
     this.scopeId = 1;
@@ -20,9 +28,12 @@ export class RxStoreFactory {
    * @param {object} initialState
    * @memberof RxStoreFactory
    */
-  injectScope(path = '', initialState) {
-    const wrappedState = this.initScope(initialState);
-    this.updateScope(path, wrappedState);
+  injectScope(path = '', initialState, reducer: Reducer) {
+    const wrappedState = this.createState(initialState);
+    this.SCOPE[path] = {
+      reducer,
+    };
+    this.updateState(path, wrappedState);
   }
   /**
    * 更新scope
@@ -30,7 +41,7 @@ export class RxStoreFactory {
    * @param {object} state
    * @memberof RxStoreFactory
    */
-  updateScope(path: string, state) {
+  updateState(path: string, state) {
     const nextState = this._processInject(path.split('.'), this.store.value, state);
     this.store.next(nextState);
   }
@@ -69,7 +80,7 @@ export class RxStoreFactory {
    * @returns {object}
    * @memberof RxStoreFactory
    */
-  initScope(initialState = {}) {
+  createState(initialState = {}) {
     const scopeId = this.scopeId++; // eslint-disable-line
     this.observers = this.observers.push({
       $scopeId: scopeId,

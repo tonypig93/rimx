@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/distinctUntilChanged';
 import { compareFn } from './utils';
+import { Reducer, Action } from './types';
 
 export class ControlledSubject {
   path: string;
@@ -79,8 +80,20 @@ export class ControlledSubject {
       } else {
         newData = input;
       }
-      root.updateScope(this.path, newData);
+      if (newData instanceof Observable) {
+        newData.subscribe(_data => {
+          root.updateState(this.path, _data);
+        });
+      } else {
+        root.updateState(this.path, newData);
+      }
     }
+  
+    dispatch(action: Action) {
+      const reducer = this.root.SCOPE[this.path];
+      this.next(state => reducer(state, action));
+    }
+  
     snapshot() {
       return this.root._getSnapshot(this.pluckPath);// eslint-disable-line
     }
