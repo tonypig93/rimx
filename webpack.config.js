@@ -19,6 +19,7 @@ module.exports = {
     },
     "rxjs/BehaviorSubject",
     "rxjs/Subject",
+    "rxjs/Observable",
     "rxjs/add/operator/distinctUntilChanged",
     "rxjs/add/operator/map",
   ],
