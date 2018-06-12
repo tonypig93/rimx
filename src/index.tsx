@@ -4,6 +4,7 @@ import { Subscription, Observable } from 'rxjs';
 import { isPlainObject, toCamelcase, normalizePath } from './utils';
 import { RxStoreFactory } from './base/factory';
 import { ControlledSubject } from './base/controlled-subject';
+import { Reducer, Action } from './base/types';
 
 interface ReactSubject extends ControlledSubject {
   listen?: (observer, key: string[], mapper: (ob: Observable<any>) => Observable<any>) => Subscription;
@@ -23,7 +24,7 @@ export const RxStore = new RxStoreFactory();
  * @param {any} connectScopes
  * @returns
  */
-export function connect(scopeName: any, initState, connectScopes) {
+export function connect(scopeName: any, initState, connectScopes, reducer: Reducer) {
   return function wrap(WrapComponent) {
     return class WrappedComponent extends React.PureComponent<any, any> {
       subject: { [key: string]: ReactSubject } = {};
@@ -35,7 +36,10 @@ export function connect(scopeName: any, initState, connectScopes) {
       constructor(p, s) {
         super(p, s);
         if (typeof scopeName === 'string') {
-          this.createScope(scopeName);
+          if (typeof connectScopes === 'function') {
+            reducer = connectScopes;
+          }
+          this.createScope(scopeName, reducer);
         }
         if (isPlainObject(scopeName) || isPlainObject(connectScopes)) {
           this.connectOptions = isPlainObject(scopeName) ? scopeName : connectScopes;
@@ -46,8 +50,8 @@ export function connect(scopeName: any, initState, connectScopes) {
       componentWillMount() {
         this.mapStateToProps(this.subject);
       }
-      createScope(name: string) {
-        RxStore.injectScope(name, initState);
+      createScope(name: string, reducer: Reducer) {
+        RxStore.injectScope(name, initState, reducer);
         this.subject[name] = this.bindListener(RxStore.getStateSubject(name));
       }
       connectScope(scopes) {

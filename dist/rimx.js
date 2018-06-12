@@ -130,6 +130,12 @@ var external_commonjs2_immutable_ = __webpack_require__(0);
 // EXTERNAL MODULE: external "rxjs/Subject"
 var Subject_ = __webpack_require__(2);
 
+// EXTERNAL MODULE: external "rxjs/add/operator/map"
+var map_ = __webpack_require__(6);
+
+// EXTERNAL MODULE: external "rxjs/add/operator/distinctUntilChanged"
+var distinctUntilChanged_ = __webpack_require__(5);
+
 // CONCATENATED MODULE: ./src/base/utils.ts
 
 function utils_isNativeType(variable) {
@@ -149,6 +155,8 @@ function utils_compareFn(a, b) {
 /**
  * @class ControlledSubject
  */
+
+
 
 
 var controlled_subject_ControlledSubject = /** @class */ (function () {
@@ -521,6 +529,18 @@ function src_connect(scopeName, initState, connectScopes) {
     };
 }
 
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+module.exports = require("rxjs/add/operator/distinctUntilChanged");
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = require("rxjs/add/operator/map");
 
 /***/ })
 /******/ ]);
