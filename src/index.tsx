@@ -79,17 +79,20 @@ export function connect(scopeName: any, initState, connectScopes, reducer: Reduc
         // };
         bindedSubject.listen = (key) => {
           let _mapper;
+          
+          const _do = (observer) => {
+            const subscription = subject.subscribe(observer, key, _mapper);
+            this.listeners.push(subscription);
+            return subscription;
+          }
+          
           function pipe(mapper) {
             _mapper = mapper;
             return {
               do: _do,
             };
           }
-          function _do(observer) {
-            const subscription = subject.subscribe(observer, key, _mapper);
-            this.listeners.push(subscription);
-            return subscription;
-          }
+
           return {
             do: _do,
             pipe,

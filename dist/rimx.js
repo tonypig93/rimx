@@ -502,6 +502,7 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                 });
             };
             WrappedComponent.prototype.bindListener = function (subject) {
+                var _this = this;
                 var bindedSubject = subject;
                 // bindedSubject.listen = (observer, key, mapper) => {
                 //   const subscription = subject.subscribe(observer, key, mapper);
@@ -510,16 +511,16 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                 // };
                 bindedSubject.listen = function (key) {
                     var _mapper;
+                    var _do = function (observer) {
+                        var subscription = subject.subscribe(observer, key, _mapper);
+                        _this.listeners.push(subscription);
+                        return subscription;
+                    };
                     function pipe(mapper) {
                         _mapper = mapper;
                         return {
                             do: _do,
                         };
-                    }
-                    function _do(observer) {
-                        var subscription = subject.subscribe(observer, key, _mapper);
-                        this.listeners.push(subscription);
-                        return subscription;
                     }
                     return {
                         do: _do,
