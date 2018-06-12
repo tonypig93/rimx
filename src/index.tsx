@@ -5,13 +5,13 @@ import { isPlainObject, toCamelcase, normalizePath } from './utils';
 import { RxStoreFactory } from './base/factory';
 import { ControlledSubject } from './base/controlled-subject';
 import { Reducer, Action } from './base/types';
+export { combineReducers } from './base/combineReducers';
 
 interface ReactSubject extends ControlledSubject {
   listen?: (observer, key: string[], mapper: (ob: Observable<any>) => Observable<any>) => Subscription;
 }
 
 export const RxStore = new RxStoreFactory();
-
 /**
  * 宿主组件：创建scope的组件；连接组件：连接到其他宿主组件的scope的组件。
  * scopeName是字符串时，表示要创建新的scope，此时initState有效，connectScopes表示需要连接的scope

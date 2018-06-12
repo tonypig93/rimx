@@ -790,9 +790,22 @@ var factory_RxStoreFactory = /** @class */ (function () {
 }());
 
 
+// CONCATENATED MODULE: ./src/base/combineReducers.ts
+function combineReducers(reducers) {
+    return function (state, action) {
+        var type = action.type;
+        if (typeof reducers[type] === 'function') {
+            return reducers[type](state, action);
+        }
+        console.warn('reducer is not a function');
+        return state;
+    };
+}
+
 // CONCATENATED MODULE: ./src/index.tsx
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RxStore", function() { return src_RxStore; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "connect", function() { return src_connect; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "combineReducers", function() { return combineReducers; });
 var src_extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -811,6 +824,7 @@ var src_assign = (undefined && undefined.__assign) || Object.assign || function(
     }
     return t;
 };
+
 
 
 
