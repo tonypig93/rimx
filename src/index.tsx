@@ -8,7 +8,12 @@ import { Reducer, Action } from './base/types';
 export { combineReducers } from './base/combineReducers';
 
 interface ReactSubject extends ControlledSubject {
-  listen?: (observer, key: string[], mapper: (ob: Observable<any>) => Observable<any>) => Subscription;
+  listen?: (key: string[]) => {
+    do: (observer) => Subscription,
+    pipe: (ob: Observable<any>) => {
+      do: (observer) => Subscription,
+    },
+  }
 }
 
 export const RxStore = new RxStoreFactory();
@@ -67,11 +72,29 @@ export function connect(scopeName: any, initState, connectScopes, reducer: Reduc
       }
       bindListener(subject: ControlledSubject) {
         const bindedSubject: ReactSubject = subject;
-        bindedSubject.listen = (observer, key, mapper) => {
-          const subscription = subject.subscribe(observer, key, mapper);
-          this.listeners.push(subscription);
-          return subscription;
-        };
+        // bindedSubject.listen = (observer, key, mapper) => {
+        //   const subscription = subject.subscribe(observer, key, mapper);
+        //   this.listeners.push(subscription);
+        //   return subscription;
+        // };
+        bindedSubject.listen = (key) => {
+          let _mapper;
+          function pipe(mapper) {
+            _mapper = mapper;
+            return {
+              do: _do,
+            };
+          }
+          function _do(observer) {
+            const subscription = subject.subscribe(observer, key, _mapper);
+            this.listeners.push(subscription);
+            return subscription;
+          }
+          return {
+            do: _do,
+            pipe,
+          }
+        }
         return bindedSubject;
       }
       mapStateToProps(subject) {

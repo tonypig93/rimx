@@ -502,12 +502,29 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                 });
             };
             WrappedComponent.prototype.bindListener = function (subject) {
-                var _this = this;
                 var bindedSubject = subject;
-                bindedSubject.listen = function (observer, key, mapper) {
-                    var subscription = subject.subscribe(observer, key, mapper);
-                    _this.listeners.push(subscription);
-                    return subscription;
+                // bindedSubject.listen = (observer, key, mapper) => {
+                //   const subscription = subject.subscribe(observer, key, mapper);
+                //   this.listeners.push(subscription);
+                //   return subscription;
+                // };
+                bindedSubject.listen = function (key) {
+                    var _mapper;
+                    function pipe(mapper) {
+                        _mapper = mapper;
+                        return {
+                            do: _do,
+                        };
+                    }
+                    function _do(observer) {
+                        var subscription = subject.subscribe(observer, key, _mapper);
+                        this.listeners.push(subscription);
+                        return subscription;
+                    }
+                    return {
+                        do: _do,
+                        pipe: pipe,
+                    };
                 };
                 return bindedSubject;
             };
