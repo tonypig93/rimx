@@ -557,12 +557,14 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                 var _this = this;
                 if (path === void 0) { path = [name]; }
                 this.stateToPropsNames.push(name);
-                subject.listen(function (d) {
+                subject
+                    .listen(normalizePath(path))
+                    .do(function (d) {
                     _this.setState((_a = {},
                         _a[name] = d,
                         _a));
                     var _a;
-                }, normalizePath(path));
+                });
             };
             WrappedComponent.prototype.getProps = function () {
                 var _this = this;

@@ -118,13 +118,15 @@ export function connect(scopeName: any, initState, connectScopes, reducer: Reduc
           });
         }
       }
-      listenState(subject, name, path = [name]) {
+      listenState(subject: ReactSubject, name, path = [name]) {
         this.stateToPropsNames.push(name);
-        subject.listen((d) => {
-          this.setState({
-            [name]: d,
+        subject
+          .listen(normalizePath(path))
+          .do(d => {
+            this.setState({
+              [name]: d,
+            });
           });
-        }, normalizePath(path));
       }
       getProps() {
         const props = {};
