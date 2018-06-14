@@ -2,6 +2,7 @@
  * @class ControlledSubject
  */
 import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/distinctUntilChanged';
 import { compareFn } from './utils';
@@ -13,6 +14,7 @@ export class ControlledSubject {
   root: any;
   scopeId: number;
   closed: boolean;
+  listeners: Subscription[] = [];
   stateObservable: Observable<any>;
     constructor(path: string, scopeId: number, root) {
       this.path = path;
@@ -22,7 +24,7 @@ export class ControlledSubject {
       this.closed = false;
       this.stateObservable = root.store
         .asObservable()
-        .map((rootState) => rootState.getIn(this.pluckPath));
+        .map((rootState) => rootState.getIn(this.pluckPath)).distinctUntilChanged(compareFn);
     }
     /**
      *
@@ -36,15 +38,13 @@ export class ControlledSubject {
       // root.takeSnapshot();
       let observable = this.stateObservable;
       if (key) {
-        observable = observable.map((d) => d.getIn(key)).distinctUntilChanged(compareFn);
-      } else {
-        observable = observable.distinctUntilChanged(compareFn);
+        observable = observable.map((d) => d.getIn(key));
       }
       if (mapper) {
         observable = mapper(observable);
       }
       const subscription = observable.subscribe(observer);
-      const unsubscribe = subscription.unsubscribe;
+      this.listeners.push(subscription);
       return subscription;
     }
     next(input) {
@@ -78,6 +78,9 @@ export class ControlledSubject {
     }
     destroy() {
       this.closed = true;
+      this.listeners.forEach(subscription => {
+        subscription.unsubscribe();
+      });
       this.root.deleteScope(this.path);
       this.root = null;
       this.stateObservable = null;

@@ -162,6 +162,7 @@ function utils_compareFn(a, b) {
 var controlled_subject_ControlledSubject = /** @class */ (function () {
     function ControlledSubject(path, scopeId, root) {
         var _this = this;
+        this.listeners = [];
         this.path = path;
         this.pluckPath = path.split('.');
         this.root = root;
@@ -169,7 +170,7 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         this.closed = false;
         this.stateObservable = root.store
             .asObservable()
-            .map(function (rootState) { return rootState.getIn(_this.pluckPath); });
+            .map(function (rootState) { return rootState.getIn(_this.pluckPath); }).distinctUntilChanged(utils_compareFn);
     }
     /**
      *
@@ -183,16 +184,13 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         // root.takeSnapshot();
         var observable = this.stateObservable;
         if (key) {
-            observable = observable.map(function (d) { return d.getIn(key); }).distinctUntilChanged(utils_compareFn);
-        }
-        else {
-            observable = observable.distinctUntilChanged(utils_compareFn);
+            observable = observable.map(function (d) { return d.getIn(key); });
         }
         if (mapper) {
             observable = mapper(observable);
         }
         var subscription = observable.subscribe(observer);
-        var unsubscribe = subscription.unsubscribe;
+        this.listeners.push(subscription);
         return subscription;
     };
     ControlledSubject.prototype.next = function (input) {
@@ -227,6 +225,9 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
     };
     ControlledSubject.prototype.destroy = function () {
         this.closed = true;
+        this.listeners.forEach(function (subscription) {
+            subscription.unsubscribe();
+        });
         this.root.deleteScope(this.path);
         this.root = null;
         this.stateObservable = null;
@@ -404,7 +405,6 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                 var _this = _super.call(this, p, s) || this;
                 _this.subjectMap = {};
                 _this.state = {};
-                _this.listeners = [];
                 _this.isConnected = false;
                 _this.stateToPropsNames = [];
                 if (typeof scopeName === 'string') {
@@ -425,13 +425,9 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
             };
             WrappedComponent.prototype.componentWillUnmount = function () {
                 var _this = this;
-                this.listeners.forEach(function (listener) {
-                    listener.unsubscribe();
-                });
                 Object.keys(this.subjectMap).forEach(function (key) {
                     _this.subjectMap[key].destroy();
                 });
-                this.listeners = null;
                 this.subjectMap = null;
             };
             WrappedComponent.prototype.createScope = function (name, reducer) {
@@ -446,13 +442,11 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                 });
             };
             WrappedComponent.prototype.bindListener = function (subject) {
-                var _this = this;
                 var bindedSubject = subject;
                 bindedSubject.listen = function (key) {
                     var _mapper;
                     var _do = function (observer) {
                         var subscription = subject.subscribe(observer, key, _mapper);
-                        _this.listeners.push(subscription);
                         return subscription;
                     };
                     function pipe(mapper) {

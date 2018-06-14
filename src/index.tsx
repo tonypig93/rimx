@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Subscription, Observable } from 'rxjs';
-
+import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
 import { isPlainObject, toCamelcase, normalizePath } from './utils';
 import { RxStoreFactory } from './base/factory';
 import { ControlledSubject } from './base/controlled-subject';
@@ -34,7 +34,6 @@ export function connect(scopeName: any, initState, connectScopes, reducer: Reduc
     return class WrappedComponent extends React.PureComponent<any, any> {
       subjectMap: { [key: string]: ReactSubject } = {};
       state = {};
-      listeners: Subscription[] = [];
       isConnected = false;
       stateToPropsNames: string[] = [];
       connectOptions: any;
@@ -56,14 +55,9 @@ export function connect(scopeName: any, initState, connectScopes, reducer: Reduc
         this.mapStateToProps(this.subjectMap);
       }
       componentWillUnmount() {
-        this.listeners.forEach((listener) => {
-          listener.unsubscribe();
-        });
         Object.keys(this.subjectMap).forEach(key => {
           this.subjectMap[key].destroy();
         });
-
-        this.listeners = null;
         this.subjectMap = null;
       }
       createScope(name: string, reducer: Reducer) {
@@ -83,7 +77,6 @@ export function connect(scopeName: any, initState, connectScopes, reducer: Reduc
           
           const _do = (observer) => {
             const subscription = subject.subscribe(observer, key, _mapper);
-            this.listeners.push(subscription);
             return subscription;
           }
           
