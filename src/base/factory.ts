@@ -14,26 +14,24 @@ interface SCOPE {
 export class RxStoreFactory {
   store: BehaviorSubject<Immutable.Map<string, any>>;
   scopeId: number;
-  observers: Immutable.List<any>;
   SCOPE: SCOPE = {};
   constructor() {
     this.store = new BehaviorSubject(Immutable.Map());
     this.scopeId = 1;
-    this.observers = Immutable.List([]);
   }
   
   /**
    * 注入新的scope
-   * @param {string} [path='']
+   * @param {string} scopeName
    * @param {object} initialState
    * @memberof RxStoreFactory
    */
-  injectScope(path = '', initialState, reducer: Reducer) {
+  injectScope(scopeName = '', initialState, reducer: Reducer) {
     const wrappedState = this.createState(initialState);
-    this.SCOPE[path] = {
+    this.SCOPE[scopeName] = {
       reducer,
     };
-    this.updateState(path, wrappedState);
+    this.updateState(scopeName, wrappedState);
   }
   /**
    * 更新scope
@@ -52,7 +50,6 @@ export class RxStoreFactory {
   takeSnapshot() {
     console.group('RxStore snapshot');
     console.log('root state: ', this.store.value.toJS());
-    console.log(`subscriptions(${this.observers.size}): `, this.observers.toJS());
     console.log(`subject observers(${this.store.observers.length}): `, this.store.observers);
     console.groupEnd();
   }
@@ -82,28 +79,11 @@ export class RxStoreFactory {
    */
   createState(initialState = {}) {
     const scopeId = this.scopeId++; // eslint-disable-line
-    this.observers = this.observers.push({
-      $scopeId: scopeId,
-      observers: [],
-    });
     return Object.assign(initialState, {
       $scopeId: scopeId,
     });
   }
-  /**
-   * 查找scope内的observer
-   * @param {number} scopeId
-   * @returns {object}
-   * @memberof RxStoreFactory
-   */
-  findScopeObservers(scopeId: number) {
-    return this.observers.find((ob) => {
-      if (!ob) {
-        throw new Error(`cannot find the observer list of scope ${this.scopeId}`);
-      }
-      return ob.$scopeId === scopeId;
-    });
-  }
+
   /**
    * 生成当前scope的快照
    * @param {string[]} pluckPath
@@ -134,5 +114,9 @@ export class RxStoreFactory {
   destroy() {
     // TO DO: prevent memory leak
     this.store.complete();
+  }
+
+  destroyScope(scopeName) {
+    this.deleteScope(scopeName);
   }
 }

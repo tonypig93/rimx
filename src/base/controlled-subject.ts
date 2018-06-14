@@ -1,9 +1,8 @@
 /**
  * @class ControlledSubject
  */
-import { Subject } from 'rxjs/Subject';
 import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/distinctUntilChanged';
 import { compareFn } from './utils';
@@ -14,15 +13,14 @@ export class ControlledSubject {
   pluckPath: string[];
   root: any;
   scopeId: number;
-  streamControl: Subject<any>;
   closed: boolean;
+  unsubscribe$ = new Subject();
   stateObservable: Observable<any>;
     constructor(path: string, scopeId: number, root) {
       this.path = path;
       this.pluckPath = path.split('.');
       this.root = root;
       this.scopeId = scopeId;
-      this.streamControl = new Subject();
       this.closed = false;
       this.stateObservable = root.store
         .asObservable()
@@ -47,45 +45,27 @@ export class ControlledSubject {
       if (mapper) {
         observable = mapper(observable);
       }
-      const subscription = observable.subscribe(observer);
-      const observerScopeControl = root.findScopeObservers(this.scopeId);
-      if (observerScopeControl) {
-        observerScopeControl.observers.push(subscription);
-        root.observers.set(root.observers.findIndex((ob) => {
-          if (!ob) {
-            throw new Error(`cannot find the observer list of scope ${this.scopeId}`);
-          }
-          return ob.$scopeId === this.scopeId;
-        }), observerScopeControl);
-      } else {
-        throw new Error('Unknow error');
-      }
-      const unsubscribe = subscription.unsubscribe;
-      subscription.unsubscribe = function _unsubscribe() {
-        // const index = observerScopeControl.observers.findIndex((item) => item === subscription);
-        // todo: delete item in array
-        unsubscribe.call(subscription);
-      };
+      const subscription = observable.takeUntil(this.unsubscribe$).subscribe(observer);
       return subscription;
     }
     next(input) {
       if (this.closed) {
         return;
       }
-      let newData;
+      let nextState;
       const root = this.root;
       if (typeof input === 'function') {
         const snapshot = root._getSnapshot(this.pluckPath);// eslint-disable-line
-        newData = input(snapshot);
+        nextState = input(snapshot);
       } else {
-        newData = input;
+        nextState = input;
       }
-      if (newData instanceof Observable) {
-        newData.subscribe(_data => {
+      if (nextState instanceof Observable) {
+        nextState.subscribe(_data => {
           root.updateState(this.path, _data);
         });
       } else {
-        root.updateState(this.path, newData);
+        root.updateState(this.path, nextState);
       }
     }
   
@@ -98,21 +78,12 @@ export class ControlledSubject {
       return this.root._getSnapshot(this.pluckPath);// eslint-disable-line
     }
     destroy() {
-      const root = this.root;
-      const observerScopeControl = root.findScopeObservers(this.scopeId);
+      this.unsubscribe$.next();
+      this.unsubscribe$.complete();
+      
       this.closed = true;
-  
-      if (observerScopeControl) {
-        observerScopeControl.observers.forEach((ob) => ob.unsubscribe());
-      }
-      root.deleteScope(this.path);
-      const index = root.observers.findIndex((ob) => {
-        if (!ob) {
-          throw new Error(`cannot find the observer list of scope ${this.scopeId}`);
-        }
-        return ob.$scopeId === this.scopeId;
-      });
-      root.observers = root.observers.delete(index);
+      this.root = null;
+      this.stateObservable = null;
     }
   }
   
