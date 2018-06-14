@@ -67,7 +67,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -92,16 +92,10 @@ module.exports = require("rxjs/Observable");
 /* 3 */
 /***/ (function(module, exports) {
 
-module.exports = require("rxjs/Subject");
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
 module.exports = require("rxjs/BehaviorSubject");
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -128,22 +122,19 @@ function normalizePath(path) {
 }
 
 // EXTERNAL MODULE: external "rxjs/BehaviorSubject"
-var BehaviorSubject_ = __webpack_require__(4);
+var BehaviorSubject_ = __webpack_require__(3);
 
 // EXTERNAL MODULE: external {"commonjs2":"immutable"}
 var external_commonjs2_immutable_ = __webpack_require__(0);
-
-// EXTERNAL MODULE: external "rxjs/Subject"
-var Subject_ = __webpack_require__(3);
 
 // EXTERNAL MODULE: external "rxjs/Observable"
 var Observable_ = __webpack_require__(2);
 
 // EXTERNAL MODULE: external "rxjs/add/operator/map"
-var map_ = __webpack_require__(7);
+var map_ = __webpack_require__(6);
 
 // EXTERNAL MODULE: external "rxjs/add/operator/distinctUntilChanged"
-var distinctUntilChanged_ = __webpack_require__(6);
+var distinctUntilChanged_ = __webpack_require__(5);
 
 // CONCATENATED MODULE: ./src/base/utils.ts
 
@@ -168,7 +159,6 @@ function utils_compareFn(a, b) {
 
 
 
-
 var controlled_subject_ControlledSubject = /** @class */ (function () {
     function ControlledSubject(path, scopeId, root) {
         var _this = this;
@@ -176,7 +166,6 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         this.pluckPath = path.split('.');
         this.root = root;
         this.scopeId = scopeId;
-        this.streamControl = new Subject_["Subject"]();
         this.closed = false;
         this.stateObservable = root.store
             .asObservable()
@@ -190,7 +179,6 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
      * @memberof ControlledSubject
      */
     ControlledSubject.prototype.subscribe = function (observer, key, mapper) {
-        var _this = this;
         var root = this.root;
         // root.takeSnapshot();
         var observable = this.stateObservable;
@@ -204,25 +192,7 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
             observable = mapper(observable);
         }
         var subscription = observable.subscribe(observer);
-        var observerScopeControl = root.findScopeObservers(this.scopeId);
-        if (observerScopeControl) {
-            observerScopeControl.observers.push(subscription);
-            root.observers.set(root.observers.findIndex(function (ob) {
-                if (!ob) {
-                    throw new Error("cannot find the observer list of scope " + _this.scopeId);
-                }
-                return ob.$scopeId === _this.scopeId;
-            }), observerScopeControl);
-        }
-        else {
-            throw new Error('Unknow error');
-        }
         var unsubscribe = subscription.unsubscribe;
-        subscription.unsubscribe = function _unsubscribe() {
-            // const index = observerScopeControl.observers.findIndex((item) => item === subscription);
-            // todo: delete item in array
-            unsubscribe.call(subscription);
-        };
         return subscription;
     };
     ControlledSubject.prototype.next = function (input) {
@@ -230,22 +200,22 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         if (this.closed) {
             return;
         }
-        var newData;
+        var nextState;
         var root = this.root;
         if (typeof input === 'function') {
             var snapshot = root._getSnapshot(this.pluckPath); // eslint-disable-line
-            newData = input(snapshot);
+            nextState = input(snapshot);
         }
         else {
-            newData = input;
+            nextState = input;
         }
-        if (newData instanceof Observable_["Observable"]) {
-            newData.subscribe(function (_data) {
+        if (nextState instanceof Observable_["Observable"]) {
+            nextState.subscribe(function (_data) {
                 root.updateState(_this.path, _data);
             });
         }
         else {
-            root.updateState(this.path, newData);
+            root.updateState(this.path, nextState);
         }
     };
     ControlledSubject.prototype.dispatch = function (action) {
@@ -256,21 +226,10 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         return this.root._getSnapshot(this.pluckPath); // eslint-disable-line
     };
     ControlledSubject.prototype.destroy = function () {
-        var _this = this;
-        var root = this.root;
-        var observerScopeControl = root.findScopeObservers(this.scopeId);
         this.closed = true;
-        if (observerScopeControl) {
-            observerScopeControl.observers.forEach(function (ob) { return ob.unsubscribe(); });
-        }
-        root.deleteScope(this.path);
-        var index = root.observers.findIndex(function (ob) {
-            if (!ob) {
-                throw new Error("cannot find the observer list of scope " + _this.scopeId);
-            }
-            return ob.$scopeId === _this.scopeId;
-        });
-        root.observers = root.observers.delete(index);
+        this.root.deleteScope(this.path);
+        this.root = null;
+        this.stateObservable = null;
     };
     return ControlledSubject;
 }());
@@ -285,21 +244,20 @@ var factory_RxStoreFactory = /** @class */ (function () {
         this.SCOPE = {};
         this.store = new BehaviorSubject_["BehaviorSubject"](external_commonjs2_immutable_["Map"]());
         this.scopeId = 1;
-        this.observers = external_commonjs2_immutable_["List"]([]);
     }
     /**
      * 注入新的scope
-     * @param {string} [path='']
+     * @param {string} scopeName
      * @param {object} initialState
      * @memberof RxStoreFactory
      */
-    RxStoreFactory.prototype.injectScope = function (path, initialState, reducer) {
-        if (path === void 0) { path = ''; }
+    RxStoreFactory.prototype.injectScope = function (scopeName, initialState, reducer) {
+        if (scopeName === void 0) { scopeName = ''; }
         var wrappedState = this.createState(initialState);
-        this.SCOPE[path] = {
+        this.SCOPE[scopeName] = {
             reducer: reducer,
         };
-        this.updateState(path, wrappedState);
+        this.updateState(scopeName, wrappedState);
     };
     /**
      * 更新scope
@@ -318,7 +276,6 @@ var factory_RxStoreFactory = /** @class */ (function () {
     RxStoreFactory.prototype.takeSnapshot = function () {
         console.group('RxStore snapshot');
         console.log('root state: ', this.store.value.toJS());
-        console.log("subscriptions(" + this.observers.size + "): ", this.observers.toJS());
         console.log("subject observers(" + this.store.observers.length + "): ", this.store.observers);
         console.groupEnd();
     };
@@ -349,27 +306,8 @@ var factory_RxStoreFactory = /** @class */ (function () {
     RxStoreFactory.prototype.createState = function (initialState) {
         if (initialState === void 0) { initialState = {}; }
         var scopeId = this.scopeId++; // eslint-disable-line
-        this.observers = this.observers.push({
-            $scopeId: scopeId,
-            observers: [],
-        });
         return Object.assign(initialState, {
             $scopeId: scopeId,
-        });
-    };
-    /**
-     * 查找scope内的observer
-     * @param {number} scopeId
-     * @returns {object}
-     * @memberof RxStoreFactory
-     */
-    RxStoreFactory.prototype.findScopeObservers = function (scopeId) {
-        var _this = this;
-        return this.observers.find(function (ob) {
-            if (!ob) {
-                throw new Error("cannot find the observer list of scope " + _this.scopeId);
-            }
-            return ob.$scopeId === scopeId;
         });
     };
     /**
@@ -464,7 +402,7 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
             src_extends(WrappedComponent, _super);
             function WrappedComponent(p, s) {
                 var _this = _super.call(this, p, s) || this;
-                _this.subject = {};
+                _this.subjectMap = {};
                 _this.state = {};
                 _this.listeners = [];
                 _this.isConnected = false;
@@ -483,32 +421,33 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                 return _this;
             }
             WrappedComponent.prototype.componentWillMount = function () {
-                this.mapStateToProps(this.subject);
+                this.mapStateToProps(this.subjectMap);
+            };
+            WrappedComponent.prototype.componentWillUnmount = function () {
+                var _this = this;
+                this.listeners.forEach(function (listener) {
+                    listener.unsubscribe();
+                });
+                Object.keys(this.subjectMap).forEach(function (key) {
+                    _this.subjectMap[key].destroy();
+                });
+                this.listeners = null;
+                this.subjectMap = null;
             };
             WrappedComponent.prototype.createScope = function (name, reducer) {
                 src_RxStore.injectScope(name, initState, reducer);
-                this.subject[name] = this.bindListener(src_RxStore.getStateSubject(name));
+                this.subjectMap[name] = this.bindListener(src_RxStore.getStateSubject(name));
             };
             WrappedComponent.prototype.connectScope = function (scopes) {
                 var _this = this;
                 Object.keys(scopes).filter(function (key) { return key !== scopeName; }).forEach(function (key) {
                     var _subject = src_RxStore.getStateSubject(key);
-                    _this.subject[key] = _this.bindListener(_subject);
-                });
-            };
-            WrappedComponent.prototype.componentWillUnmount = function () {
-                this.listeners.forEach(function (listener) {
-                    listener.unsubscribe();
+                    _this.subjectMap[key] = _this.bindListener(_subject);
                 });
             };
             WrappedComponent.prototype.bindListener = function (subject) {
                 var _this = this;
                 var bindedSubject = subject;
-                // bindedSubject.listen = (observer, key, mapper) => {
-                //   const subscription = subject.subscribe(observer, key, mapper);
-                //   this.listeners.push(subscription);
-                //   return subscription;
-                // };
                 bindedSubject.listen = function (key) {
                     var _mapper;
                     var _do = function (observer) {
@@ -567,7 +506,7 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                     var _a;
                 });
             };
-            WrappedComponent.prototype.getProps = function () {
+            WrappedComponent.prototype.getPropsInState = function () {
                 var _this = this;
                 var props = {};
                 this.stateToPropsNames.forEach(function (name) {
@@ -575,17 +514,26 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                 });
                 return props;
             };
-            WrappedComponent.prototype.getSubjectInstance = function () {
-                if (this.isConnected) {
-                    return this.subject;
+            WrappedComponent.prototype.getInjectProps = function () {
+                var subjectsKey = Object.keys(this.subjectMap);
+                var props;
+                if (subjectsKey.length === 1) {
+                    var subject = this.subjectMap[subjectsKey[0]];
+                    props = {
+                        listen: subject.listen,
+                        dispatch: subject.dispatch,
+                        subject: subject,
+                    };
                 }
                 else {
-                    return this.subject[scopeName];
+                    props = {
+                        subject: this.subjectMap,
+                    };
                 }
+                return props;
             };
             WrappedComponent.prototype.render = function () {
-                var valueProps = this.getProps();
-                return (external_commonjs2_react_["createElement"](WrapComponent, src_assign({}, this.props, valueProps, { subject: this.getSubjectInstance() })));
+                return (external_commonjs2_react_["createElement"](WrapComponent, src_assign({}, this.getPropsInState(), this.getInjectProps(), this.props)));
             };
             return WrappedComponent;
         }(external_commonjs2_react_["PureComponent"]));
@@ -594,13 +542,13 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
 
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports) {
 
 module.exports = require("rxjs/add/operator/distinctUntilChanged");
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports) {
 
 module.exports = require("rxjs/add/operator/map");

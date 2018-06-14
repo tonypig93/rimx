@@ -32,7 +32,7 @@ export const RxStore = new RxStoreFactory();
 export function connect(scopeName: any, initState, connectScopes, reducer: Reducer) {
   return function wrap(WrapComponent) {
     return class WrappedComponent extends React.PureComponent<any, any> {
-      subject: { [key: string]: ReactSubject } = {};
+      subjectMap: { [key: string]: ReactSubject } = {};
       state = {};
       listeners: Subscription[] = [];
       isConnected = false;
@@ -53,30 +53,31 @@ export function connect(scopeName: any, initState, connectScopes, reducer: Reduc
         }
       }
       componentWillMount() {
-        this.mapStateToProps(this.subject);
-      }
-      createScope(name: string, reducer: Reducer) {
-        RxStore.injectScope(name, initState, reducer);
-        this.subject[name] = this.bindListener(RxStore.getStateSubject(name));
-      }
-      connectScope(scopes) {
-        Object.keys(scopes).filter((key) => key !== scopeName).forEach((key) => {
-          const _subject = RxStore.getStateSubject(key);
-          this.subject[key] = this.bindListener(_subject)
-        });
+        this.mapStateToProps(this.subjectMap);
       }
       componentWillUnmount() {
         this.listeners.forEach((listener) => {
           listener.unsubscribe();
         });
+        Object.keys(this.subjectMap).forEach(key => {
+          this.subjectMap[key].destroy();
+        });
+
+        this.listeners = null;
+        this.subjectMap = null;
+      }
+      createScope(name: string, reducer: Reducer) {
+        RxStore.injectScope(name, initState, reducer);
+        this.subjectMap[name] = this.bindListener(RxStore.getStateSubject(name));
+      }
+      connectScope(scopes) {
+        Object.keys(scopes).filter((key) => key !== scopeName).forEach((key) => {
+          const _subject = RxStore.getStateSubject(key);
+          this.subjectMap[key] = this.bindListener(_subject)
+        });
       }
       bindListener(subject: ControlledSubject) {
         const bindedSubject: ReactSubject = subject;
-        // bindedSubject.listen = (observer, key, mapper) => {
-        //   const subscription = subject.subscribe(observer, key, mapper);
-        //   this.listeners.push(subscription);
-        //   return subscription;
-        // };
         bindedSubject.listen = (key) => {
           let _mapper;
           
@@ -131,27 +132,37 @@ export function connect(scopeName: any, initState, connectScopes, reducer: Reduc
             });
           });
       }
-      getProps() {
+      getPropsInState() {
         const props = {};
         this.stateToPropsNames.forEach((name) => {
           props[name] = this.state[name];
         });
         return props;
       }
-      getSubjectInstance() {
-        if (this.isConnected) {
-          return this.subject;
+
+      getInjectProps() {
+        const subjectsKey = Object.keys(this.subjectMap);
+        let props;
+        if (subjectsKey.length === 1) {
+          const subject = this.subjectMap[subjectsKey[0]];
+          props = {
+            listen: subject.listen,
+            dispatch: subject.dispatch,
+            subject,
+          };
         } else {
-          return this.subject[scopeName];
+          props = {
+            subject: this.subjectMap,
+          };
         }
+        return props;
       }
       render() {
-        const valueProps = this.getProps();
         return (
           <WrapComponent
+            {...this.getPropsInState()}
+            {...this.getInjectProps()}
             {...this.props}
-            {...valueProps}
-            subject={this.getSubjectInstance()}
           />
         );
       }
