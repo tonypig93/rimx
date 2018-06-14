@@ -67,7 +67,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -92,16 +92,19 @@ module.exports = require("rxjs/Subject");
 /* 3 */
 /***/ (function(module, exports) {
 
+<<<<<<< HEAD
 module.exports = require("rxjs/Observable");
 
 /***/ }),
 /* 4 */
 /***/ (function(module, exports) {
 
+=======
+>>>>>>> f16a411c8a968c09063316f29743363ae245ad91
 module.exports = require("rxjs/BehaviorSubject");
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -128,7 +131,7 @@ function normalizePath(path) {
 }
 
 // EXTERNAL MODULE: external "rxjs/BehaviorSubject"
-var BehaviorSubject_ = __webpack_require__(4);
+var BehaviorSubject_ = __webpack_require__(3);
 
 // EXTERNAL MODULE: external {"commonjs2":"immutable"}
 var external_commonjs2_immutable_ = __webpack_require__(0);
@@ -140,10 +143,10 @@ var Observable_ = __webpack_require__(3);
 var Subject_ = __webpack_require__(2);
 
 // EXTERNAL MODULE: external "rxjs/add/operator/map"
-var map_ = __webpack_require__(7);
+var map_ = __webpack_require__(6);
 
 // EXTERNAL MODULE: external "rxjs/add/operator/distinctUntilChanged"
-var distinctUntilChanged_ = __webpack_require__(6);
+var distinctUntilChanged_ = __webpack_require__(5);
 
 // CONCATENATED MODULE: ./src/base/utils.ts
 
@@ -168,11 +171,10 @@ function utils_compareFn(a, b) {
 
 
 
-
 var controlled_subject_ControlledSubject = /** @class */ (function () {
     function ControlledSubject(path, scopeId, root) {
         var _this = this;
-        this.unsubscribe$ = new Subject_["Subject"]();
+        this.listeners = [];
         this.path = path;
         this.pluckPath = path.split('.');
         this.root = root;
@@ -180,7 +182,7 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         this.closed = false;
         this.stateObservable = root.store
             .asObservable()
-            .map(function (rootState) { return rootState.getIn(_this.pluckPath); });
+            .map(function (rootState) { return rootState.getIn(_this.pluckPath); }).distinctUntilChanged(utils_compareFn);
     }
     /**
      *
@@ -194,15 +196,13 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         // root.takeSnapshot();
         var observable = this.stateObservable;
         if (key) {
-            observable = observable.map(function (d) { return d.getIn(key); }).distinctUntilChanged(utils_compareFn);
-        }
-        else {
-            observable = observable.distinctUntilChanged(utils_compareFn);
+            observable = observable.map(function (d) { return d.getIn(key); });
         }
         if (mapper) {
             observable = mapper(observable);
         }
-        var subscription = observable.takeUntil(this.unsubscribe$).subscribe(observer);
+        var subscription = observable.subscribe(observer);
+        this.listeners.push(subscription);
         return subscription;
     };
     ControlledSubject.prototype.next = function (input) {
@@ -236,9 +236,11 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         return this.root._getSnapshot(this.pluckPath); // eslint-disable-line
     };
     ControlledSubject.prototype.destroy = function () {
-        this.unsubscribe$.next();
-        this.unsubscribe$.complete();
         this.closed = true;
+        this.listeners.forEach(function (subscription) {
+            subscription.unsubscribe();
+        });
+        this.root.deleteScope(this.path);
         this.root = null;
         this.stateObservable = null;
     };
@@ -551,13 +553,13 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
 
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports) {
 
 module.exports = require("rxjs/add/operator/distinctUntilChanged");
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports) {
 
 module.exports = require("rxjs/add/operator/map");
