@@ -173,6 +173,10 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
     function ControlledSubject(path, scopeId, root) {
         var _this = this;
         this.unsubscribe$ = new Subject_["Subject"]();
+        this.dispatch = function (action) {
+            var reducer = _this.root.SCOPE[_this.path].reducer;
+            _this.next(function (state) { return reducer(state, action); });
+        };
         this.path = path;
         this.pluckPath = path.split('.');
         this.root = root;
@@ -227,10 +231,6 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         else {
             root.updateState(this.path, nextState);
         }
-    };
-    ControlledSubject.prototype.dispatch = function (action) {
-        var reducer = this.root.SCOPE[this.path].reducer;
-        this.next(function (state) { return reducer(state, action); });
     };
     ControlledSubject.prototype.snapshot = function () {
         return this.root._getSnapshot(this.pluckPath); // eslint-disable-line
