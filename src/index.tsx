@@ -30,7 +30,7 @@ export const RxStore = new RxStoreFactory();
  * @returns
  */
 export function connect(scopeName: any, initState, connectScopes, reducer: Reducer) {
-  return function wrap(WrapComponent) {
+  return function wrap(WrapComponent, usePureComponent = true) {
     return class WrappedComponent extends React.PureComponent<any, any> {
       subjectMap: { [key: string]: ReactSubject } = {};
       state = {};
@@ -38,8 +38,8 @@ export function connect(scopeName: any, initState, connectScopes, reducer: Reduc
       isScopeRoot = false;
       stateToPropsNames: string[] = [];
       connectOptions: any;
-      constructor(p, s) {
-        super(p, s);
+      constructor(props, context) {
+        super(props, context);
         if (typeof scopeName === 'string') {
           if (typeof connectScopes === 'function') {
             reducer = connectScopes;
