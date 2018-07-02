@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { Subscription, Observable } from 'rxjs';
+import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Observable';
 
 import { isPlainObject, toCamelcase, normalizePath } from './utils';
 import { RxStoreFactory } from './base/factory';

@@ -140,10 +140,13 @@ var Observable_ = __webpack_require__(3);
 var Subject_ = __webpack_require__(2);
 
 // EXTERNAL MODULE: external "rxjs/add/operator/map"
-var map_ = __webpack_require__(7);
+var map_ = __webpack_require__(8);
 
 // EXTERNAL MODULE: external "rxjs/add/operator/distinctUntilChanged"
-var distinctUntilChanged_ = __webpack_require__(6);
+var distinctUntilChanged_ = __webpack_require__(7);
+
+// EXTERNAL MODULE: external "rxjs/add/operator/takeUntil"
+var takeUntil_ = __webpack_require__(6);
 
 // CONCATENATED MODULE: ./src/base/utils.ts
 
@@ -164,6 +167,7 @@ function utils_compareFn(a, b) {
 /**
  * @class ControlledSubject
  */
+
 
 
 
@@ -411,11 +415,12 @@ var src_RxStore = new factory_RxStoreFactory();
  * @returns
  */
 function src_connect(scopeName, initState, connectScopes, reducer) {
-    return function wrap(WrapComponent) {
+    return function wrap(WrapComponent, usePureComponent) {
+        if (usePureComponent === void 0) { usePureComponent = true; }
         return /** @class */ (function (_super) {
             src_extends(WrappedComponent, _super);
-            function WrappedComponent(p, s) {
-                var _this = _super.call(this, p, s) || this;
+            function WrappedComponent(props, context) {
+                var _this = _super.call(this, props, context) || this;
                 _this.subjectMap = {};
                 _this.state = {};
                 _this.isConnected = false;
@@ -554,10 +559,16 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
 /* 6 */
 /***/ (function(module, exports) {
 
-module.exports = require("rxjs/add/operator/distinctUntilChanged");
+module.exports = require("rxjs/add/operator/takeUntil");
 
 /***/ }),
 /* 7 */
+/***/ (function(module, exports) {
+
+module.exports = require("rxjs/add/operator/distinctUntilChanged");
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports) {
 
 module.exports = require("rxjs/add/operator/map");

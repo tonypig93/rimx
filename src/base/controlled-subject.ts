@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/takeUntil';
 import { compareFn } from './utils';
 import { Reducer, Action } from './types';
 

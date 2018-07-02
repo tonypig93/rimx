@@ -20,11 +20,14 @@ module.exports = {
     "rxjs/BehaviorSubject",
     "rxjs/Subject",
     "rxjs/Observable",
+    'rxjs/Subscription',
     "rxjs/add/operator/distinctUntilChanged",
     "rxjs/add/operator/map",
+    'rxjs/add/operator/takeUntil',
   ],
   optimization: {
     minimize: false,
+    concatenateModules: true,
   },
   module: {
     rules: [
