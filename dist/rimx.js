@@ -443,7 +443,7 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                 this.mapStateToProps(this.subjectMap);
             };
             WrappedComponent.prototype.shouldComponentUpdate = function (nextProps, nextState) {
-                if (nextProps !== this.props) {
+                if (nextProps !== this.props || nextState !== this.state) {
                     return true;
                 }
                 return false;
