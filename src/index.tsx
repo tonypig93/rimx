@@ -52,9 +52,13 @@ export function connect(scopeName: any, initState, connectScopes, reducer: Reduc
           this.connectScope(this.connectOptions);
           this.isConnected = true;
         }
-      }
-      componentWillMount() {
         this.mapStateToProps(this.subjectMap);
+      }
+      shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps !== this.props) {
+          return true;
+        }
+        return false;
       }
       componentWillUnmount() {
         Object.keys(this.subjectMap).forEach(key => {

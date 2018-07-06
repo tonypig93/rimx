@@ -437,10 +437,14 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                     _this.connectScope(_this.connectOptions);
                     _this.isConnected = true;
                 }
+                _this.mapStateToProps(_this.subjectMap);
                 return _this;
             }
-            WrappedComponent.prototype.componentWillMount = function () {
-                this.mapStateToProps(this.subjectMap);
+            WrappedComponent.prototype.shouldComponentUpdate = function (nextProps, nextState) {
+                if (nextProps !== this.props) {
+                    return true;
+                }
+                return false;
             };
             WrappedComponent.prototype.componentWillUnmount = function () {
                 var _this = this;
