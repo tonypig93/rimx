@@ -32,7 +32,7 @@ export const RxStore = new RxStoreFactory();
  */
 export function connect(scopeName: any, initState, connectScopes, reducer: Reducer) {
   return function wrap(WrapComponent, usePureComponent = true) {
-    return class WrappedComponent extends React.PureComponent<any, any> {
+    return class WrappedComponent extends React.Component<any, any> {
       subjectMap: { [key: string]: ReactSubject } = {};
       state = {};
       isConnected = false;

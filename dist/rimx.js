@@ -550,7 +550,7 @@ function src_connect(scopeName, initState, connectScopes, reducer) {
                 return (external_commonjs2_react_["createElement"](WrapComponent, src_assign({}, this.getPropsInState(), this.getInjectProps(), this.props)));
             };
             return WrappedComponent;
-        }(external_commonjs2_react_["PureComponent"]));
+        }(external_commonjs2_react_["Component"]));
     };
 }
 
