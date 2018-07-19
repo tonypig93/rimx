@@ -243,7 +243,6 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
         this.closed = true;
-        this.root.SCOPE[this.path] = undefined;
         this.root = null;
         this.stateObservable = null;
     };
