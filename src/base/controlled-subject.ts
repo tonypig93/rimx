@@ -83,6 +83,7 @@ export class ControlledSubject {
       this.unsubscribe$.complete();
       
       this.closed = true;
+      this.root.SCOPE[this.path] = undefined;
       this.root = null;
       this.stateObservable = null;
     }

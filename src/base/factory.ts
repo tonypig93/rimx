@@ -69,7 +69,7 @@ export class RxStoreFactory {
    * @param {object} initialState
    */
   _processInject(path: string[], rootState, initialState) {
-    return rootState.mergeIn(path, initialState);
+    return rootState.mergeDeepIn(path, initialState);
   }
   /**
    * 为scope初始化state
