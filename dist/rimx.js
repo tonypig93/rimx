@@ -243,6 +243,7 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
         this.closed = true;
+        this.root.SCOPE[this.path] = undefined;
         this.root = null;
         this.stateObservable = null;
     };
@@ -310,7 +311,7 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @param {object} initialState
      */
     RxStoreFactory.prototype._processInject = function (path, rootState, initialState) {
-        return rootState.mergeIn(path, initialState);
+        return rootState.mergeDeepIn(path, initialState);
     };
     /**
      * 为scope初始化state
