@@ -2,6 +2,8 @@ const gulp = require("gulp");
 const ts = require("gulp-typescript");
 const path = require("path");
 const rimraf = require('rimraf');
+const rollup = require('rollup');
+const rollupTypescript = require('rollup-plugin-typescript');
 
 const cwd = process.cwd();
 const through2 = require("through2");
