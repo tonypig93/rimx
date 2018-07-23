@@ -26,12 +26,17 @@ export class RxStoreFactory {
    * @param {object} initialState
    * @memberof RxStoreFactory
    */
-  injectScope(scopeName = '', initialState, reducer: Reducer) {
-    const wrappedState = this.createState(initialState);
+  injectScope(scopeName = '', initialState, reducer: Reducer, cacheState = false) {
+    const prevScopeState = this._getSnapshot([scopeName]);
+    if (prevScopeState && prevScopeState.__cached) return;
+    
+    const wrappedState = this.createState(initialState, cacheState);
     this.SCOPE[scopeName] = {
       reducer,
     };
-    this.updateState(scopeName, wrappedState);
+    // this.updateState(scopeName, wrappedState);
+    const nextState = this.store.value.set(scopeName, Immutable.fromJS(wrappedState));
+    this.store.next(nextState);
   }
   /**
    * 更新scope
@@ -77,10 +82,11 @@ export class RxStoreFactory {
    * @returns {object}
    * @memberof RxStoreFactory
    */
-  createState(initialState = {}) {
+  createState(initialState = {}, cacheState: boolean) {
     const scopeId = this.scopeId++; // eslint-disable-line
     return Object.assign(initialState, {
       $scopeId: scopeId,
+      __cached: cacheState,
     });
   }
 

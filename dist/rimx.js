@@ -164,13 +164,19 @@
          * @param {object} initialState
          * @memberof RxStoreFactory
          */
-        RxStoreFactory.prototype.injectScope = function (scopeName, initialState, reducer) {
+        RxStoreFactory.prototype.injectScope = function (scopeName, initialState, reducer, cacheState) {
             if (scopeName === void 0) { scopeName = ''; }
-            var wrappedState = this.createState(initialState);
+            if (cacheState === void 0) { cacheState = false; }
+            var prevScopeState = this._getSnapshot([scopeName]);
+            if (prevScopeState && prevScopeState.__cached)
+                return;
+            var wrappedState = this.createState(initialState, cacheState);
             this.SCOPE[scopeName] = {
                 reducer: reducer,
             };
-            this.updateState(scopeName, wrappedState);
+            // this.updateState(scopeName, wrappedState);
+            var nextState = this.store.value.set(scopeName, Immutable.fromJS(wrappedState));
+            this.store.next(nextState);
         };
         /**
          * 更新scope
@@ -216,11 +222,12 @@
          * @returns {object}
          * @memberof RxStoreFactory
          */
-        RxStoreFactory.prototype.createState = function (initialState) {
+        RxStoreFactory.prototype.createState = function (initialState, cacheState) {
             if (initialState === void 0) { initialState = {}; }
             var scopeId = this.scopeId++; // eslint-disable-line
             return Object.assign(initialState, {
                 $scopeId: scopeId,
+                __cached: cacheState,
             });
         };
         /**
@@ -272,21 +279,9 @@
     }
 
     var RxStore = new RxStoreFactory();
-    /**
-     * 宿主组件：创建scope的组件；连接组件：连接到其他宿主组件的scope的组件。
-     * scopeName是字符串时，表示要创建新的scope，此时initState有效，connectScopes表示需要连接的scope
-     * scopeName是对象时，表示要创建连接组件，scopeName的key为要连接的scopeName，value为函数时，函数需要从scope snapshot中返回需要的值（mapStateToProps），prop key为key。
-     * value为对象时，{ propName: string; map: (data) => data }
-     *
-     * @export
-     * @param {any} scopeName
-     * @param {any} initState
-     * @param {any} connectScopes
-     * @returns
-     */
-    function connect(scopeName, initState, connectScopes, reducer) {
-        return function wrap(WrapComponent, usePureComponent) {
-            if (usePureComponent === void 0) { usePureComponent = true; }
+    function connect(options) {
+        // const { scopeName, initState, connectScopes, reducer, cache } = this.options;
+        return function wrap(WrapComponent) {
             return /** @class */ (function (_super) {
                 __extends(WrappedComponent, _super);
                 function WrappedComponent(props, context) {
@@ -296,14 +291,11 @@
                     _this.isConnected = false;
                     _this.isScopeRoot = false;
                     _this.stateToPropsNames = [];
-                    if (typeof scopeName === 'string') {
-                        if (typeof connectScopes === 'function') {
-                            reducer = connectScopes;
-                        }
-                        _this.createScope(scopeName, reducer);
+                    if (typeof options.scopeName === 'string') {
+                        _this.createScope(options.scopeName, options.reducer, options.cache);
                     }
-                    if (isPlainObject(scopeName) || isPlainObject(connectScopes)) {
-                        _this.connectOptions = isPlainObject(scopeName) ? scopeName : connectScopes;
+                    if (isPlainObject(options.connectScopes)) {
+                        _this.connectOptions = options.connectScopes;
                         _this.connectScope(_this.connectOptions);
                         _this.isConnected = true;
                     }
@@ -325,14 +317,14 @@
                     });
                     this.subjectMap = null;
                 };
-                WrappedComponent.prototype.createScope = function (name, reducer) {
+                WrappedComponent.prototype.createScope = function (name, reducer, cache) {
                     this.isScopeRoot = true;
-                    RxStore.injectScope(name, initState, reducer);
+                    RxStore.injectScope(name, options.initState, reducer, cache);
                     this.subjectMap[name] = this.bindListener(RxStore.getStateSubject(name));
                 };
                 WrappedComponent.prototype.connectScope = function (scopes) {
                     var _this = this;
-                    Object.keys(scopes).filter(function (key) { return key !== scopeName; }).forEach(function (key) {
+                    Object.keys(scopes).filter(function (key) { return key !== options.scopeName; }).forEach(function (key) {
                         var _subject = RxStore.getStateSubject(key);
                         _this.subjectMap[key] = _this.bindListener(_subject);
                     });
@@ -429,6 +421,155 @@
             }(React.Component));
         };
     }
+    /**
+     * 宿主组件：创建scope的组件；连接组件：连接到其他宿主组件的scope的组件。
+     * scopeName是字符串时，表示要创建新的scope，此时initState有效，connectScopes表示需要连接的scope
+     * scopeName是对象时，表示要创建连接组件，scopeName的key为要连接的scopeName，value为函数时，函数需要从scope snapshot中返回需要的值（mapStateToProps），prop key为key。
+     * value为对象时，{ propName: string; map: (data) => data }
+     *
+     * @export
+     * @param {any} scopeName
+     * @param {any} initState
+     * @param {any} connectScopes
+     * @returns
+     */
+    // export function connect(scopeName: any, initState, connectScopes, reducer: Reducer) {
+    //   return function wrap(WrapComponent) {
+    //     return class WrappedComponent extends React.Component<any, any> {
+    //       subjectMap: { [key: string]: ReactSubject } = {};
+    //       state = {};
+    //       isConnected = false;
+    //       isScopeRoot = false;
+    //       stateToPropsNames: string[] = [];
+    //       connectOptions: any;
+    //       constructor(props, context) {
+    //         super(props, context);
+    //         if (typeof scopeName === 'string') {
+    //           if (typeof connectScopes === 'function') {
+    //             reducer = connectScopes;
+    //           }
+    //           this.createScope(scopeName, reducer);
+    //         }
+    //         if (isPlainObject(scopeName) || isPlainObject(connectScopes)) {
+    //           this.connectOptions = isPlainObject(scopeName) ? scopeName : connectScopes;
+    //           this.connectScope(this.connectOptions);
+    //           this.isConnected = true;
+    //         }
+    //       }
+    //       componentWillMount() {
+    //         this.mapStateToProps(this.subjectMap);
+    //       }
+    //       shouldComponentUpdate(nextProps, nextState) {
+    //         if (nextProps !== this.props || nextState !== this.state) {
+    //           return true;
+    //         }
+    //         return false;
+    //       }
+    //       componentWillUnmount() {
+    //         Object.keys(this.subjectMap).forEach(key => {
+    //           this.subjectMap[key].destroy();
+    //         });
+    //         this.subjectMap = null;
+    //       }
+    //       createScope(name: string, reducer: Reducer) {
+    //         this.isScopeRoot = true;
+    //         RxStore.injectScope(name, initState, reducer);
+    //         this.subjectMap[name] = this.bindListener(RxStore.getStateSubject(name));
+    //       }
+    //       connectScope(scopes) {
+    //         Object.keys(scopes).filter((key) => key !== scopeName).forEach((key) => {
+    //           const _subject = RxStore.getStateSubject(key);
+    //           this.subjectMap[key] = this.bindListener(_subject)
+    //         });
+    //       }
+    //       bindListener(subject: ControlledSubject) {
+    //         const bindedSubject: ReactSubject = subject;
+    //         bindedSubject.listen = (key) => {
+    //           let _mapper;
+    //           const _do = (observer) => {
+    //             const subscription = subject.subscribe(observer, key, _mapper);
+    //             return subscription;
+    //           }
+    //           function pipe(mapper) {
+    //             _mapper = mapper;
+    //             return {
+    //               do: _do,
+    //             };
+    //           }
+    //           return {
+    //             do: _do,
+    //             pipe,
+    //           }
+    //         }
+    //         return bindedSubject;
+    //       }
+    //       mapStateToProps(subject) {
+    //         if (this.isConnected) {
+    //           Object.keys(this.connectOptions).forEach((key) => {
+    //             const mapProps = this.connectOptions[key];
+    //             const subj = subject[key];
+    //             if (typeof mapProps === 'string') {
+    //               this.listenState(subj, toCamelcase(mapProps));
+    //             } else if (isPlainObject(mapProps)) {
+    //               this.listenState(subj, toCamelcase(mapProps.propName), mapProps.path);
+    //             } else if (Array.isArray(mapProps)) {
+    //               mapProps.forEach((item) => {
+    //                 if (typeof item === 'string') {
+    //                   this.listenState(subj, toCamelcase(item));
+    //                 } else if (isPlainObject(item)) {
+    //                   this.listenState(subj, toCamelcase(item.propName), item.path);
+    //                 }
+    //               });
+    //             }
+    //           });
+    //         }
+    //       }
+    //       listenState(subject: ReactSubject, name, path = [name]) {
+    //         this.stateToPropsNames.push(name);
+    //         subject
+    //           .listen(normalizePath(path))
+    //           .do(d => {
+    //             this.setState({
+    //               [name]: d,
+    //             });
+    //           });
+    //       }
+    //       getPropsInState() {
+    //         const props = {};
+    //         this.stateToPropsNames.forEach((name) => {
+    //           props[name] = this.state[name];
+    //         });
+    //         return props;
+    //       }
+    //       getInjectProps() {
+    //         const subjectsKey = Object.keys(this.subjectMap);
+    //         let props;
+    //         if (subjectsKey.length === 1) {
+    //           const subject = this.subjectMap[subjectsKey[0]];
+    //           props = {
+    //             listen: subject.listen,
+    //             dispatch: subject.dispatch,
+    //             subject,
+    //           };
+    //         } else {
+    //           props = {
+    //             subject: this.subjectMap,
+    //           };
+    //         }
+    //         return props;
+    //       }
+    //       render() {
+    //         return (
+    //           <WrapComponent
+    //             {...this.getPropsInState()}
+    //             {...this.getInjectProps()}
+    //             {...this.props}
+    //           />
+    //         );
+    //       }
+    //     };
+    //   };
+    // }
 
     exports.RxStore = RxStore;
     exports.connect = connect;
