@@ -168,7 +168,7 @@
             if (scopeName === void 0) { scopeName = ''; }
             if (cacheState === void 0) { cacheState = false; }
             var prevScopeState = this._getSnapshot([scopeName]);
-            if (prevScopeState && prevScopeState.__cached)
+            if (prevScopeState && prevScopeState.get('__cached'))
                 return;
             var wrappedState = this.createState(initialState, cacheState);
             this.SCOPE[scopeName] = {

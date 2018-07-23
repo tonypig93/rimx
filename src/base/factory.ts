@@ -28,7 +28,7 @@ export class RxStoreFactory {
    */
   injectScope(scopeName = '', initialState, reducer: Reducer, cacheState = false) {
     const prevScopeState = this._getSnapshot([scopeName]);
-    if (prevScopeState && prevScopeState.__cached) return;
+    if (prevScopeState && prevScopeState.get('__cached')) return;
     
     const wrappedState = this.createState(initialState, cacheState);
     this.SCOPE[scopeName] = {
