@@ -81,10 +81,7 @@ export class ControlledSubject {
     destroy() {
       this.unsubscribe$.next();
       this.unsubscribe$.complete();
-      
       this.closed = true;
-      this.root = null;
-      this.stateObservable = null;
     }
   }
   
