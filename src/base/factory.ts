@@ -44,8 +44,8 @@ export class RxStoreFactory {
    * @param {object} state
    * @memberof RxStoreFactory
    */
-  updateState(path: string, state) {
-    const nextState = this._processInject(path.split('.'), this.store.value, state);
+  updateState(path: string, state, merge) {
+    const nextState = this._processInject(path.split('.'), this.store.value, state, merge);
     this.store.next(nextState);
   }
   /**
@@ -73,8 +73,8 @@ export class RxStoreFactory {
    * @param {object} rootState
    * @param {object} initialState
    */
-  _processInject(path: string[], rootState, initialState) {
-    return rootState.mergeDeepIn(path, initialState);
+  _processInject(path: string[], rootState, initialState, merge) {
+    return merge ? rootState.mergeDeepIn(path, initialState) : rootState.updateIn(path, () => initialState);
   }
   /**
    * 为scope初始化state

@@ -49,7 +49,7 @@ export class ControlledSubject {
       const subscription = observable.takeUntil(this.unsubscribe$).subscribe(observer);
       return subscription;
     }
-    next(input) {
+    next(input, merge = true) {
       if (this.closed) {
         return;
       }
@@ -63,16 +63,16 @@ export class ControlledSubject {
       }
       if (nextState instanceof Observable) {
         nextState.subscribe(_data => {
-          root.updateState(this.path, _data);
+          root.updateState(this.path, _data, merge);
         });
       } else {
-        root.updateState(this.path, nextState);
+        root.updateState(this.path, nextState, merge);
       }
     }
   
-    dispatch = (action: Action) => {
+    dispatch = (action: Action, merge) => {
       const reducer = this.root.SCOPE[this.path].reducer;
-      this.next(state => reducer(state, action));
+      this.next(state => reducer(state, action), merge);
     }
   
     snapshot() {
@@ -81,7 +81,10 @@ export class ControlledSubject {
     destroy() {
       this.unsubscribe$.next();
       this.unsubscribe$.complete();
+      
       this.closed = true;
+      this.root = null;
+      this.stateObservable = null;
     }
   }
   
