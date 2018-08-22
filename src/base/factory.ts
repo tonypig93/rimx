@@ -26,11 +26,11 @@ export class RxStoreFactory {
    * @param {object} initialState
    * @memberof RxStoreFactory
    */
-  injectScope(scopeName = '', initialState, reducer: Reducer, cacheState = false) {
+  injectScope(scopeName = '', initialState, reducer: Reducer, cacheState = false, log = false) {
     const prevScopeState = this._getSnapshot([scopeName]);
     if (prevScopeState && prevScopeState.get('__cached')) return;
     
-    const wrappedState = this.createState(initialState, cacheState);
+    const wrappedState = this.createState(initialState, cacheState, log);
     this.SCOPE[scopeName] = {
       reducer,
     };
@@ -82,11 +82,12 @@ export class RxStoreFactory {
    * @returns {object}
    * @memberof RxStoreFactory
    */
-  createState(initialState = {}, cacheState: boolean) {
+  createState(initialState = {}, cacheState: boolean, log: boolean) {
     const scopeId = this.scopeId++; // eslint-disable-line
     return Object.assign(initialState, {
       $scopeId: scopeId,
       __cached: cacheState,
+      log,
     });
   }
 
@@ -107,11 +108,13 @@ export class RxStoreFactory {
    */
   getStateSubject(path: string) {
     const pluckPath = path.split('.');
-    const scopeId = this._getSnapshot(pluckPath).get('$scopeId');// eslint-disable-line
+    const state = this._getSnapshot(pluckPath);
+    const scopeId = state.get('$scopeId');// eslint-disable-line
+    const log = state.get('log');
     if (!scopeId) {
       throw new Error('The state path you have required does not exist!');
     }
-    return new ControlledSubject(path, scopeId, this);
+    return new ControlledSubject(path, scopeId, log, this);
   }
   /**
    * 销毁store

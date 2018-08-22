@@ -25,6 +25,7 @@ interface Options {
   };
   reducer?: Reducer;
   cache?: boolean;
+  log?: boolean;
 }
 
 export const RxStore = new RxStoreFactory();
@@ -42,7 +43,7 @@ export function connect(options: Options) {
       constructor(props, context) {
         super(props, context);
         if (typeof options.scopeName === 'string') {
-          this.createScope(options.scopeName, options.reducer, options.cache);
+          this.createScope(options.scopeName, options.reducer, options.cache, options.log);
         }
         if (isPlainObject(options.connectScopes)) {
           this.connectOptions = options.connectScopes;
@@ -68,9 +69,9 @@ export function connect(options: Options) {
 
         this.subjectMap = null;
       }
-      createScope(name: string, reducer: Reducer, cache: boolean) {
+      createScope(name: string, reducer: Reducer, cache: boolean, log: boolean) {
         this.isScopeRoot = true;
-        RxStore.injectScope(name, options.initState, reducer, cache);
+        RxStore.injectScope(name, options.initState, reducer, cache, log);
         this.subjectMap[name] = this.bindListener(RxStore.getStateSubject(name));
       }
       connectScope(scopes) {

@@ -174,11 +174,14 @@ function utils_compareFn(a, b) {
 
 
 var controlled_subject_ControlledSubject = /** @class */ (function () {
-    function ControlledSubject(path, scopeId, root) {
+    function ControlledSubject(path, scopeId, log, root) {
         var _this = this;
         this.unsubscribe$ = new Subject_["Subject"]();
         this.dispatch = function (action, merge) {
             var reducer = _this.root.SCOPE[_this.path].reducer;
+            if (_this.log) {
+                console.log('action:', action);
+            }
             _this.next(function (state) { return reducer(state, action); }, merge);
         };
         this.path = path;
@@ -186,6 +189,7 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         this.root = root;
         this.scopeId = scopeId;
         this.closed = false;
+        this.log = log;
         this.stateObservable = root.store
             .asObservable()
             .map(function (rootState) { return rootState.getIn(_this.pluckPath); });
@@ -214,7 +218,6 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         return subscription;
     };
     ControlledSubject.prototype.next = function (input, merge) {
-        var _this = this;
         if (merge === void 0) { merge = true; }
         if (this.closed) {
             return;
@@ -228,13 +231,22 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         else {
             nextState = input;
         }
+        if (this.log) {
+            console.log('before change', root._getSnapshot(this.pluckPath));
+        }
+        function updater(next) {
+            root.updateState(this.path, next, merge);
+            if (this.log) {
+                console.log('after change', root._getSnapshot(this.pluckPath));
+            }
+        }
         if (nextState instanceof Observable_["Observable"]) {
             nextState.subscribe(function (_data) {
-                root.updateState(_this.path, _data, merge);
+                updater(_data);
             });
         }
         else {
-            root.updateState(this.path, nextState, merge);
+            updater(nextState);
         }
     };
     ControlledSubject.prototype.snapshot = function () {
@@ -267,13 +279,14 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @param {object} initialState
      * @memberof RxStoreFactory
      */
-    RxStoreFactory.prototype.injectScope = function (scopeName, initialState, reducer, cacheState) {
+    RxStoreFactory.prototype.injectScope = function (scopeName, initialState, reducer, cacheState, log) {
         if (scopeName === void 0) { scopeName = ''; }
         if (cacheState === void 0) { cacheState = false; }
+        if (log === void 0) { log = false; }
         var prevScopeState = this._getSnapshot([scopeName]);
         if (prevScopeState && prevScopeState.get('__cached'))
             return;
-        var wrappedState = this.createState(initialState, cacheState);
+        var wrappedState = this.createState(initialState, cacheState, log);
         this.SCOPE[scopeName] = {
             reducer: reducer,
         };
@@ -325,12 +338,13 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @returns {object}
      * @memberof RxStoreFactory
      */
-    RxStoreFactory.prototype.createState = function (initialState, cacheState) {
+    RxStoreFactory.prototype.createState = function (initialState, cacheState, log) {
         if (initialState === void 0) { initialState = {}; }
         var scopeId = this.scopeId++; // eslint-disable-line
         return Object.assign(initialState, {
             $scopeId: scopeId,
             __cached: cacheState,
+            log: log,
         });
     };
     /**
@@ -350,11 +364,13 @@ var factory_RxStoreFactory = /** @class */ (function () {
      */
     RxStoreFactory.prototype.getStateSubject = function (path) {
         var pluckPath = path.split('.');
-        var scopeId = this._getSnapshot(pluckPath).get('$scopeId'); // eslint-disable-line
+        var state = this._getSnapshot(pluckPath);
+        var scopeId = state.get('$scopeId'); // eslint-disable-line
+        var log = state.get('log');
         if (!scopeId) {
             throw new Error('The state path you have required does not exist!');
         }
-        return new controlled_subject_ControlledSubject(path, scopeId, this);
+        return new controlled_subject_ControlledSubject(path, scopeId, log, this);
     };
     /**
      * 销毁store
@@ -423,7 +439,7 @@ function src_connect(options) {
                 _this.isScopeRoot = false;
                 _this.stateToPropsNames = [];
                 if (typeof options.scopeName === 'string') {
-                    _this.createScope(options.scopeName, options.reducer, options.cache);
+                    _this.createScope(options.scopeName, options.reducer, options.cache, options.log);
                 }
                 if (isPlainObject(options.connectScopes)) {
                     _this.connectOptions = options.connectScopes;
@@ -448,9 +464,9 @@ function src_connect(options) {
                 });
                 this.subjectMap = null;
             };
-            WrappedComponent.prototype.createScope = function (name, reducer, cache) {
+            WrappedComponent.prototype.createScope = function (name, reducer, cache, log) {
                 this.isScopeRoot = true;
-                src_RxStore.injectScope(name, options.initState, reducer, cache);
+                src_RxStore.injectScope(name, options.initState, reducer, cache, log);
                 this.subjectMap[name] = this.bindListener(src_RxStore.getStateSubject(name));
             };
             WrappedComponent.prototype.connectScope = function (scopes) {

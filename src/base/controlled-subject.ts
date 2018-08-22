@@ -16,13 +16,15 @@ export class ControlledSubject {
   scopeId: number;
   closed: boolean;
   unsubscribe$ = new Subject();
+  log: boolean;
   stateObservable: Observable<any>;
-    constructor(path: string, scopeId: number, root) {
+    constructor(path: string, scopeId: number, log, root) {
       this.path = path;
       this.pluckPath = path.split('.');
       this.root = root;
       this.scopeId = scopeId;
       this.closed = false;
+      this.log = log;
       this.stateObservable = root.store
         .asObservable()
         .map((rootState) => rootState.getIn(this.pluckPath));
@@ -61,17 +63,32 @@ export class ControlledSubject {
       } else {
         nextState = input;
       }
+
+      if (this.log) {
+        console.log('before change', root._getSnapshot(this.pluckPath));
+      }
+
+      function updater(next) {
+        root.updateState(this.path, next, merge);
+        if (this.log) {
+          console.log('after change', root._getSnapshot(this.pluckPath));
+        }
+      }
+
       if (nextState instanceof Observable) {
         nextState.subscribe(_data => {
-          root.updateState(this.path, _data, merge);
+          updater(_data);
         });
       } else {
-        root.updateState(this.path, nextState, merge);
+        updater(nextState)
       }
     }
   
     dispatch = (action: Action, merge) => {
       const reducer = this.root.SCOPE[this.path].reducer;
+      if (this.log) {
+        console.log('action:', action);
+      }
       this.next(state => reducer(state, action), merge);
     }
   
