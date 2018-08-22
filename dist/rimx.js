@@ -218,6 +218,7 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         return subscription;
     };
     ControlledSubject.prototype.next = function (input, merge) {
+        var _this = this;
         if (merge === void 0) { merge = true; }
         if (this.closed) {
             return;
@@ -234,12 +235,12 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
         if (this.log) {
             console.log('before change', root._getSnapshot(this.pluckPath));
         }
-        function updater(next) {
-            root.updateState(this.path, next, merge);
-            if (this.log) {
-                console.log('after change', root._getSnapshot(this.pluckPath));
+        var updater = function (next) {
+            root.updateState(_this.path, next, merge);
+            if (_this.log) {
+                console.log('after change', root._getSnapshot(_this.pluckPath));
             }
-        }
+        };
         if (nextState instanceof Observable_["Observable"]) {
             nextState.subscribe(function (_data) {
                 updater(_data);

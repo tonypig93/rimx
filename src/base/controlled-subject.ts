@@ -68,7 +68,7 @@ export class ControlledSubject {
         console.log('before change', root._getSnapshot(this.pluckPath));
       }
 
-      function updater(next) {
+      const updater = (next) => {
         root.updateState(this.path, next, merge);
         if (this.log) {
           console.log('after change', root._getSnapshot(this.pluckPath));
