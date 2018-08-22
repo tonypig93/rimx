@@ -1,6 +1,6 @@
 {
   "name": "rimx",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "A state management tool for React, based on RxJS and ImmutableJS.",
   "main": "dist/rimx.js",
   "jsnext:main": "lib/index.js",
