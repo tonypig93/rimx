@@ -1,121 +1,63 @@
-module.exports =
-/******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports) {
+import { is, Map, fromJS } from 'immutable';
+import { Observable } from 'rxjs/Observable';
+import { Subject } from 'rxjs/Subject';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/operator/takeUntil';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { createElement, Component } from 'react';
 
-module.exports = require("immutable");
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
 
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
 
-module.exports = require("react");
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
 
-/***/ }),
-/* 2 */
-/***/ (function(module, exports) {
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
 
-module.exports = require("rxjs/Subject");
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
-module.exports = require("rxjs/Observable");
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-module.exports = require("rxjs/BehaviorSubject");
-
-/***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-
-// EXTERNAL MODULE: external {"commonjs2":"react"}
-var external_commonjs2_react_ = __webpack_require__(1);
-
-// CONCATENATED MODULE: ./src/utils.ts
-function isPlainObject(value) {
-    return (value && (value.constructor === Object || value.constructor === undefined));
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
-function toCamelcase(value) {
-    return value.replace(/-([a-z])/ig, function (all, letter) { return letter.toUpperCase(); });
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+
+function isNativeType(variable) {
+    return (typeof variable === 'string' ||
+        typeof variable === 'number' ||
+        typeof variable === 'undefined' ||
+        variable === null);
+}
+function compareFn(a, b) {
+    if (isNativeType(a) && isNativeType(b)) {
+        return a === b;
+    }
+    return is(a, b);
 }
 function normalizePath(path) {
     if (Array.isArray(path)) {
@@ -126,74 +68,34 @@ function normalizePath(path) {
     }
     throw new Error('invalid path type');
 }
-
-// EXTERNAL MODULE: external "rxjs/BehaviorSubject"
-var BehaviorSubject_ = __webpack_require__(4);
-
-// EXTERNAL MODULE: external {"commonjs2":"immutable"}
-var external_commonjs2_immutable_ = __webpack_require__(0);
-
-// EXTERNAL MODULE: external "rxjs/Observable"
-var Observable_ = __webpack_require__(3);
-
-// EXTERNAL MODULE: external "rxjs/Subject"
-var Subject_ = __webpack_require__(2);
-
-// EXTERNAL MODULE: external "rxjs/add/operator/map"
-var map_ = __webpack_require__(8);
-
-// EXTERNAL MODULE: external "rxjs/add/operator/distinctUntilChanged"
-var distinctUntilChanged_ = __webpack_require__(7);
-
-// EXTERNAL MODULE: external "rxjs/add/operator/takeUntil"
-var takeUntil_ = __webpack_require__(6);
-
-// CONCATENATED MODULE: ./src/base/utils.ts
-
-function utils_isNativeType(variable) {
-    return (typeof variable === "string" ||
-        typeof variable === "number" ||
-        typeof variable === "undefined" ||
-        variable === null);
+function isPlainObject(value) {
+    return (value && (value.constructor === Object || value.constructor === undefined));
 }
-function utils_compareFn(a, b) {
-    if (utils_isNativeType(a) && utils_isNativeType(b)) {
-        return a === b;
-    }
-    return Object(external_commonjs2_immutable_["is"])(a, b);
+function toCamelcase(value) {
+    return value.replace(/-([a-z])/gi, function (all, letter) { return letter.toUpperCase(); });
 }
 
-// CONCATENATED MODULE: ./src/base/controlled-subject.ts
-/**
- * @class ControlledSubject
- */
-
-
-
-
-
-
-var controlled_subject_ControlledSubject = /** @class */ (function () {
-    function ControlledSubject(path, scopeId, log, root) {
+var ScopeController = /** @class */ (function () {
+    function ScopeController(scopeName, store, updateStore) {
         var _this = this;
-        this.unsubscribe$ = new Subject_["Subject"]();
-        this.dispatch = function (action, merge) {
-            var reducer = _this.root.SCOPE[_this.path].reducer;
-            if (_this.log) {
-                console.log('action:', action);
-            }
-            _this.next(function (state) { return reducer(state, action); }, merge);
-        };
-        this.path = path;
-        this.pluckPath = path.split('.');
-        this.root = root;
-        this.scopeId = scopeId;
+        this.scopeName = scopeName;
+        this.store = store;
+        this.updateStore = updateStore;
         this.closed = false;
-        this.log = log;
-        this.stateObservable = root.store
+        this.stateChangeCounter = 0;
+        this.unsubscribe$ = new Subject();
+        this.dispatch = function (action, merge) {
+            var scopeState = _this.getScopeState();
+            var reducer = scopeState.get('__reducer');
+            _this.next(function (state) { return reducer(state, action); }, merge, action);
+        };
+        this.stateObservable = store
             .asObservable()
-            .map(function (rootState) { return rootState.getIn(_this.pluckPath); });
+            .map(function (rootState) { return rootState.get(scopeName); });
     }
+    ScopeController.prototype.getScopeState = function () {
+        return this.store.value.get(this.scopeName);
+    };
     /**
      *
      *
@@ -201,77 +103,88 @@ var controlled_subject_ControlledSubject = /** @class */ (function () {
      * @returns
      * @memberof ControlledSubject
      */
-    ControlledSubject.prototype.subscribe = function (observer, key, mapper) {
-        var root = this.root;
+    ScopeController.prototype.subscribe = function (observer, key, mapper) {
         // root.takeSnapshot();
         var observable = this.stateObservable;
         if (key) {
-            observable = observable.map(function (d) { return d.getIn(key); }).distinctUntilChanged(utils_compareFn);
+            observable = observable
+                .map(function (d) { return d.getIn(key); })
+                .distinctUntilChanged(compareFn);
         }
         else {
-            observable = observable.distinctUntilChanged(utils_compareFn);
+            observable = observable.distinctUntilChanged(compareFn);
         }
         if (mapper) {
             observable = mapper(observable);
         }
-        var subscription = observable.takeUntil(this.unsubscribe$).subscribe(observer);
+        var subscription = observable
+            .takeUntil(this.unsubscribe$)
+            .subscribe(observer);
         return subscription;
     };
-    ControlledSubject.prototype.next = function (input, merge) {
+    ScopeController.prototype._updater = function (nextState, merge) {
+        this.updateStore(this.scopeName, nextState, merge);
+        if (nextState.get('__log')) {
+            console.log("(" + this.stateChangeCounter + ") After change");
+            console.log(nextState);
+        }
+        this.stateChangeCounter++;
+    };
+    ScopeController.prototype.next = function (input, merge, action) {
         var _this = this;
         if (merge === void 0) { merge = true; }
         if (this.closed) {
             return;
         }
+        var prevState = this.getScopeState();
         var nextState;
-        var root = this.root;
         if (typeof input === 'function') {
-            var snapshot = root._getSnapshot(this.pluckPath); // eslint-disable-line
-            nextState = input(snapshot);
+            nextState = input(prevState);
         }
         else {
             nextState = input;
         }
-        if (this.log) {
-            console.log('before change', root._getSnapshot(this.pluckPath));
-        }
-        var updater = function (next) {
-            root.updateState(_this.path, next, merge);
-            if (_this.log) {
-                console.log('after change', root._getSnapshot(_this.pluckPath));
+        if (prevState.get('__log')) {
+            console.log("(" + this.stateChangeCounter + ") Before change");
+            if (action) {
+                console.log("(" + this.stateChangeCounter + ") Action");
+                console.log(action);
             }
-        };
-        if (nextState instanceof Observable_["Observable"]) {
+            console.log(prevState);
+        }
+        if (nextState instanceof Observable) {
             nextState.subscribe(function (_data) {
-                updater(_data);
+                _this._updater(_data, merge);
             });
         }
         else {
-            updater(nextState);
+            this._updater(nextState, merge);
         }
     };
-    ControlledSubject.prototype.snapshot = function () {
-        return this.root._getSnapshot(this.pluckPath); // eslint-disable-line
-    };
-    ControlledSubject.prototype.destroy = function () {
+    ScopeController.prototype.destroy = function () {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
         this.closed = true;
-        this.root = null;
+        this.store = null;
         this.stateObservable = null;
     };
-    return ControlledSubject;
+    return ScopeController;
 }());
 
-
-// CONCATENATED MODULE: ./src/base/factory.ts
-
-
-
-var factory_RxStoreFactory = /** @class */ (function () {
+var RxStoreFactory = /** @class */ (function () {
     function RxStoreFactory() {
-        this.SCOPE = {};
-        this.store = new BehaviorSubject_["BehaviorSubject"](external_commonjs2_immutable_["Map"]());
+        var _this = this;
+        /**
+         * 更新scope
+         * @param {string} path
+         * @param {object} state
+         * @memberof RxStoreFactory
+         */
+        this.updateState = function (path, state, merge) {
+            var nextState = _this._processInject(path.split('.'), _this.store.value, state, merge);
+            _this.store.next(nextState);
+        };
+        this.store = new BehaviorSubject(Map());
         this.scopeId = 1;
     }
     /**
@@ -281,28 +194,17 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @memberof RxStoreFactory
      */
     RxStoreFactory.prototype.injectScope = function (scopeName, initialState, reducer, cacheState, log) {
-        if (scopeName === void 0) { scopeName = ''; }
         if (cacheState === void 0) { cacheState = false; }
         if (log === void 0) { log = false; }
-        var prevScopeState = this._getSnapshot([scopeName]);
+        if (!scopeName) {
+            throw new Error('You should provide a scope name to create a scope');
+        }
+        var prevScopeState = this._getSnapshot(scopeName);
         if (prevScopeState && prevScopeState.get('__cached'))
             return;
-        var wrappedState = this.createState(initialState, cacheState, log);
-        this.SCOPE[scopeName] = {
-            reducer: reducer,
-        };
+        var wrappedState = this.createState(initialState, reducer, cacheState, log);
         // this.updateState(scopeName, wrappedState);
-        var nextState = this.store.value.set(scopeName, external_commonjs2_immutable_["fromJS"](wrappedState));
-        this.store.next(nextState);
-    };
-    /**
-     * 更新scope
-     * @param {string} path
-     * @param {object} state
-     * @memberof RxStoreFactory
-     */
-    RxStoreFactory.prototype.updateState = function (path, state, merge) {
-        var nextState = this._processInject(path.split('.'), this.store.value, state, merge);
+        var nextState = this.store.value.set(scopeName, fromJS(wrappedState));
         this.store.next(nextState);
     };
     /**
@@ -331,7 +233,9 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @param {object} initialState
      */
     RxStoreFactory.prototype._processInject = function (path, rootState, initialState, merge) {
-        return merge ? rootState.mergeDeepIn(path, initialState) : rootState.updateIn(path, function () { return initialState; });
+        return merge
+            ? rootState.mergeDeepIn(path, initialState)
+            : rootState.updateIn(path, function () { return initialState; });
     };
     /**
      * 为scope初始化state
@@ -339,13 +243,14 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @returns {object}
      * @memberof RxStoreFactory
      */
-    RxStoreFactory.prototype.createState = function (initialState, cacheState, log) {
+    RxStoreFactory.prototype.createState = function (initialState, reducer, cacheState, log) {
         if (initialState === void 0) { initialState = {}; }
         var scopeId = this.scopeId++; // eslint-disable-line
         return Object.assign(initialState, {
-            $scopeId: scopeId,
+            __scopeId: scopeId,
+            __reducer: reducer,
             __cached: cacheState,
-            log: log,
+            __log: log
         });
     };
     /**
@@ -354,8 +259,8 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @returns {object}
      * @memberof RxStoreFactory
      */
-    RxStoreFactory.prototype._getSnapshot = function (pluckPath) {
-        return this.store.value.getIn(pluckPath);
+    RxStoreFactory.prototype._getSnapshot = function (path) {
+        return this.store.value.getIn(normalizePath(path));
     };
     /**
      * 获取scope subject
@@ -363,15 +268,14 @@ var factory_RxStoreFactory = /** @class */ (function () {
      * @returns {object}
      * @memberof RxStoreFactory
      */
-    RxStoreFactory.prototype.getStateSubject = function (path) {
-        var pluckPath = path.split('.');
-        var state = this._getSnapshot(pluckPath);
-        var scopeId = state.get('$scopeId'); // eslint-disable-line
-        var log = state.get('log');
+    RxStoreFactory.prototype.getScope = function (scopeName) {
+        var state = this._getSnapshot(scopeName);
+        var scopeId = state.get('__scopeId'); // eslint-disable-line
+        var log = state.get('__log');
         if (!scopeId) {
             throw new Error('The state path you have required does not exist!');
         }
-        return new controlled_subject_ControlledSubject(path, scopeId, log, this);
+        return new ScopeController(scopeName, this.store, this.updateState);
     };
     /**
      * 销毁store
@@ -387,8 +291,6 @@ var factory_RxStoreFactory = /** @class */ (function () {
     return RxStoreFactory;
 }());
 
-
-// CONCATENATED MODULE: ./src/base/combineReducers.ts
 function combineReducers(reducers) {
     return function (state, action) {
         var type = action.type;
@@ -400,38 +302,15 @@ function combineReducers(reducers) {
     };
 }
 
-// CONCATENATED MODULE: ./src/index.tsx
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RxStore", function() { return src_RxStore; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "connect", function() { return src_connect; });
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "combineReducers", function() { return combineReducers; });
-var src_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var src_assign = (undefined && undefined.__assign) || Object.assign || function(t) {
-    for (var s, i = 1, n = arguments.length; i < n; i++) {
-        s = arguments[i];
-        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-            t[p] = s[p];
-    }
-    return t;
-};
-
-
-
-
-var src_RxStore = new factory_RxStoreFactory();
-function src_connect(options) {
+var RxStore = new RxStoreFactory();
+function connect(options) {
     // const { scopeName, initState, connectScopes, reducer, cache } = this.options;
+    if (options.scope) {
+        options.scopeName = options.scope;
+    }
     return function wrap(WrapComponent) {
         return /** @class */ (function (_super) {
-            src_extends(WrappedComponent, _super);
+            __extends(WrappedComponent, _super);
             function WrappedComponent(props, context) {
                 var _this = _super.call(this, props, context) || this;
                 _this.subjectMap = {};
@@ -467,13 +346,15 @@ function src_connect(options) {
             };
             WrappedComponent.prototype.createScope = function (name, reducer, cache, log) {
                 this.isScopeRoot = true;
-                src_RxStore.injectScope(name, options.initState, reducer, cache, log);
-                this.subjectMap[name] = this.bindListener(src_RxStore.getStateSubject(name));
+                RxStore.injectScope(name, options.initState, reducer, cache, log);
+                this.subjectMap[name] = this.bindListener(RxStore.getScope(name));
             };
             WrappedComponent.prototype.connectScope = function (scopes) {
                 var _this = this;
-                Object.keys(scopes).filter(function (key) { return key !== options.scopeName; }).forEach(function (key) {
-                    var _subject = src_RxStore.getStateSubject(key);
+                Object.keys(scopes)
+                    .filter(function (key) { return key !== options.scopeName; })
+                    .forEach(function (key) {
+                    var _subject = RxStore.getScope(key);
                     _this.subjectMap[key] = _this.bindListener(_subject);
                 });
             };
@@ -488,12 +369,12 @@ function src_connect(options) {
                     function pipe(mapper) {
                         _mapper = mapper;
                         return {
-                            do: _do,
+                            do: _do
                         };
                     }
                     return {
                         do: _do,
-                        pipe: pipe,
+                        pipe: pipe
                     };
                 };
                 return bindedSubject;
@@ -527,9 +408,7 @@ function src_connect(options) {
                 var _this = this;
                 if (path === void 0) { path = [name]; }
                 this.stateToPropsNames.push(name);
-                subject
-                    .listen(normalizePath(path))
-                    .do(function (d) {
+                subject.listen(normalizePath(path)).do(function (d) {
                     _this.setState((_a = {},
                         _a[name] = d,
                         _a));
@@ -552,42 +431,22 @@ function src_connect(options) {
                     props = {
                         listen: subject.listen,
                         dispatch: subject.dispatch,
-                        subject: subject,
+                        subject: subject
                     };
                 }
                 else {
                     props = {
-                        subject: this.subjectMap,
+                        subject: this.subjectMap
                     };
                 }
                 return props;
             };
             WrappedComponent.prototype.render = function () {
-                return (external_commonjs2_react_["createElement"](WrapComponent, src_assign({}, this.getPropsInState(), this.getInjectProps(), this.props)));
+                return (createElement(WrapComponent, __assign({}, this.getPropsInState(), this.getInjectProps(), this.props)));
             };
             return WrappedComponent;
-        }(external_commonjs2_react_["Component"]));
+        }(Component));
     };
 }
 
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports) {
-
-module.exports = require("rxjs/add/operator/takeUntil");
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports) {
-
-module.exports = require("rxjs/add/operator/distinctUntilChanged");
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports) {
-
-module.exports = require("rxjs/add/operator/map");
-
-/***/ })
-/******/ ]);
+export { RxStore, connect, combineReducers };

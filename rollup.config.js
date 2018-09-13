@@ -6,7 +6,7 @@ export default {
   input: 'src/index.tsx',
   output: {
     file: 'dist/rimx.js',
-    format: 'umd',
+    format: 'es',
     name: 'rimx',
   },
   plugins: [

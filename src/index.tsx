@@ -2,26 +2,31 @@ import * as React from 'react';
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 
-import { isPlainObject, toCamelcase, normalizePath } from './utils';
+import { normalizePath, isPlainObject, toCamelcase } from './base/utils';
 import { RxStoreFactory } from './base/factory';
-import { ControlledSubject } from './base/controlled-subject';
+import { ScopeController } from './base/scope-controller';
 import { Reducer, Action } from './base/types';
 export { combineReducers } from './base/combineReducers';
 
-interface ReactSubject extends ControlledSubject {
-  listen?: (key: string[]) => {
-    do: (observer) => Subscription,
-    pipe: (ob: Observable<any>) => {
-      do: (observer) => Subscription,
-    },
-  }
+interface ReactSubject extends ScopeController {
+  listen?: (
+    key: string[]
+  ) => {
+    do: (observer) => Subscription;
+    pipe: (
+      ob: Observable<any>
+    ) => {
+      do: (observer) => Subscription;
+    };
+  };
 }
 
 interface Options {
+  scope: string;
   scopeName: string;
-  initState: any,
+  initState: any;
   connectScopes?: {
-    [scopeName: string]: any,
+    [scopeName: string]: any;
   };
   reducer?: Reducer;
   cache?: boolean;
@@ -32,6 +37,9 @@ export const RxStore = new RxStoreFactory();
 
 export function connect(options: Options) {
   // const { scopeName, initState, connectScopes, reducer, cache } = this.options;
+  if (options.scope) {
+    options.scopeName = options.scope;
+  }
   return function wrap(WrapComponent) {
     return class WrappedComponent extends React.Component<any, any> {
       subjectMap: { [key: string]: ReactSubject } = {};
@@ -43,7 +51,12 @@ export function connect(options: Options) {
       constructor(props, context) {
         super(props, context);
         if (typeof options.scopeName === 'string') {
-          this.createScope(options.scopeName, options.reducer, options.cache, options.log);
+          this.createScope(
+            options.scopeName,
+            options.reducer,
+            options.cache,
+            options.log
+          );
         }
         if (isPlainObject(options.connectScopes)) {
           this.connectOptions = options.connectScopes;
@@ -69,53 +82,64 @@ export function connect(options: Options) {
 
         this.subjectMap = null;
       }
-      createScope(name: string, reducer: Reducer, cache: boolean, log: boolean) {
+      createScope(
+        name: string,
+        reducer: Reducer,
+        cache: boolean,
+        log: boolean
+      ) {
         this.isScopeRoot = true;
         RxStore.injectScope(name, options.initState, reducer, cache, log);
-        this.subjectMap[name] = this.bindListener(RxStore.getStateSubject(name));
+        this.subjectMap[name] = this.bindListener(RxStore.getScope(name));
       }
       connectScope(scopes) {
-        Object.keys(scopes).filter((key) => key !== options.scopeName).forEach((key) => {
-          const _subject = RxStore.getStateSubject(key);
-          this.subjectMap[key] = this.bindListener(_subject)
-        });
+        Object.keys(scopes)
+          .filter(key => key !== options.scopeName)
+          .forEach(key => {
+            const _subject = RxStore.getScope(key);
+            this.subjectMap[key] = this.bindListener(_subject);
+          });
       }
 
-      bindListener(subject: ControlledSubject) {
+      bindListener(subject: ScopeController) {
         const bindedSubject: ReactSubject = subject;
-        bindedSubject.listen = (key) => {
+        bindedSubject.listen = key => {
           let _mapper;
-          
-          const _do = (observer) => {
+
+          const _do = observer => {
             const subscription = subject.subscribe(observer, key, _mapper);
             return subscription;
-          }
-          
+          };
+
           function pipe(mapper) {
             _mapper = mapper;
             return {
-              do: _do,
+              do: _do
             };
           }
 
           return {
             do: _do,
-            pipe,
-          }
-        }
+            pipe
+          };
+        };
         return bindedSubject;
       }
       mapStateToProps(subject) {
         if (this.isConnected) {
-          Object.keys(this.connectOptions).forEach((key) => {
+          Object.keys(this.connectOptions).forEach(key => {
             const mapProps = this.connectOptions[key];
             const subj = subject[key];
             if (typeof mapProps === 'string') {
               this.listenState(subj, toCamelcase(mapProps));
             } else if (isPlainObject(mapProps)) {
-              this.listenState(subj, toCamelcase(mapProps.propName), mapProps.path);
+              this.listenState(
+                subj,
+                toCamelcase(mapProps.propName),
+                mapProps.path
+              );
             } else if (Array.isArray(mapProps)) {
-              mapProps.forEach((item) => {
+              mapProps.forEach(item => {
                 if (typeof item === 'string') {
                   this.listenState(subj, toCamelcase(item));
                 } else if (isPlainObject(item)) {
@@ -128,17 +152,15 @@ export function connect(options: Options) {
       }
       listenState(subject: ReactSubject, name, path = [name]) {
         this.stateToPropsNames.push(name);
-        subject
-          .listen(normalizePath(path))
-          .do(d => {
-            this.setState({
-              [name]: d,
-            });
+        subject.listen(normalizePath(path)).do(d => {
+          this.setState({
+            [name]: d
           });
+        });
       }
       getPropsInState() {
         const props = {};
-        this.stateToPropsNames.forEach((name) => {
+        this.stateToPropsNames.forEach(name => {
           props[name] = this.state[name];
         });
         return props;
@@ -151,11 +173,11 @@ export function connect(options: Options) {
           props = {
             listen: subject.listen,
             dispatch: subject.dispatch,
-            subject,
+            subject
           };
         } else {
           props = {
-            subject: this.subjectMap,
+            subject: this.subjectMap
           };
         }
         return props;
