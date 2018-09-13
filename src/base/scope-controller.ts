@@ -62,9 +62,9 @@ export class ScopeController {
     return subscription;
   }
 
-  private _updater(nextState, merge) {
+  private _updater(nextState, merge, log) {
     this.updateStore(this.scopeName, nextState, merge);
-    if (nextState.get('__log')) {
+    if (log) {
       console.log(`(${this.stateChangeCounter}) After change`);
       console.log(nextState);
     }
@@ -76,6 +76,7 @@ export class ScopeController {
       return;
     }
     const prevState = this.getScopeState();
+    const showLog = prevState.get('__log');
     let nextState;
     if (typeof input === 'function') {
       nextState = input(prevState);
@@ -83,7 +84,7 @@ export class ScopeController {
       nextState = input;
     }
 
-    if (prevState.get('__log')) {
+    if (showLog) {
       console.log(`(${this.stateChangeCounter}) Before change`);
       if (action) {
         console.log(`(${this.stateChangeCounter}) Action`);
@@ -93,10 +94,10 @@ export class ScopeController {
     }
     if (nextState instanceof Observable) {
       nextState.subscribe(_data => {
-        this._updater(_data, merge);
+        this._updater(_data, merge, showLog);
       });
     } else {
-      this._updater(nextState, merge);
+      this._updater(nextState, merge, showLog);
     }
   }
 

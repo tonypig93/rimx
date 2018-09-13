@@ -122,9 +122,9 @@ var ScopeController = /** @class */ (function () {
             .subscribe(observer);
         return subscription;
     };
-    ScopeController.prototype._updater = function (nextState, merge) {
+    ScopeController.prototype._updater = function (nextState, merge, log) {
         this.updateStore(this.scopeName, nextState, merge);
-        if (nextState.get('__log')) {
+        if (log) {
             console.log("(" + this.stateChangeCounter + ") After change");
             console.log(nextState);
         }
@@ -137,6 +137,7 @@ var ScopeController = /** @class */ (function () {
             return;
         }
         var prevState = this.getScopeState();
+        var showLog = prevState.get('__log');
         var nextState;
         if (typeof input === 'function') {
             nextState = input(prevState);
@@ -144,7 +145,7 @@ var ScopeController = /** @class */ (function () {
         else {
             nextState = input;
         }
-        if (prevState.get('__log')) {
+        if (showLog) {
             console.log("(" + this.stateChangeCounter + ") Before change");
             if (action) {
                 console.log("(" + this.stateChangeCounter + ") Action");
@@ -154,11 +155,11 @@ var ScopeController = /** @class */ (function () {
         }
         if (nextState instanceof Observable) {
             nextState.subscribe(function (_data) {
-                _this._updater(_data, merge);
+                _this._updater(_data, merge, showLog);
             });
         }
         else {
-            this._updater(nextState, merge);
+            this._updater(nextState, merge, showLog);
         }
     };
     ScopeController.prototype.destroy = function () {
@@ -297,7 +298,7 @@ function combineReducers(reducers) {
         if (typeof reducers[type] === 'function') {
             return reducers[type](state, action);
         }
-        console.warn('reducer is not a function');
+        console.warn('Expected reducer to be a function');
         return state;
     };
 }
