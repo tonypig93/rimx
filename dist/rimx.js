@@ -162,6 +162,9 @@ var ScopeController = /** @class */ (function () {
             this._updater(nextState, merge, showLog);
         }
     };
+    ScopeController.prototype.snapshot = function () {
+        return this.getScopeState();
+    };
     ScopeController.prototype.destroy = function () {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();

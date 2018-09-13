@@ -108,6 +108,10 @@ export class ScopeController {
     this.next(state => reducer(state, action), merge, action);
   };
 
+  snapshot() {
+    return this.getScopeState();
+  }
+
   destroy() {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
