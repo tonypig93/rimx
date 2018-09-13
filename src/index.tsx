@@ -8,7 +8,7 @@ import { ScopeController } from './base/scope-controller';
 import { Reducer, Action } from './base/types';
 export { combineReducers } from './base/combineReducers';
 
-interface ReactSubject extends ScopeController {
+interface ReactScopeController extends ScopeController {
   listen?: (
     key: string[]
   ) => {
@@ -36,13 +36,12 @@ interface Options {
 export const RxStore = new RxStoreFactory();
 
 export function connect(options: Options) {
-  // const { scopeName, initState, connectScopes, reducer, cache } = this.options;
   if (options.scope) {
     options.scopeName = options.scope;
   }
-  return function wrap(WrapComponent) {
+  return function wrap(ConnectedComponent) {
     return class WrappedComponent extends React.Component<any, any> {
-      subjectMap: { [key: string]: ReactSubject } = {};
+      controllerSet: { [key: string]: ReactScopeController } = {};
       state = {};
       isConnected = false;
       isScopeRoot = false;
@@ -66,7 +65,7 @@ export function connect(options: Options) {
       }
 
       componentWillMount() {
-        this.mapStateToProps(this.subjectMap);
+        this.mapStateToProps(this.controllerSet);
       }
 
       shouldComponentUpdate(nextProps, nextState) {
@@ -75,13 +74,15 @@ export function connect(options: Options) {
         }
         return false;
       }
+
       componentWillUnmount() {
-        Object.keys(this.subjectMap).forEach(key => {
-          this.subjectMap[key].destroy();
+        Object.keys(this.controllerSet).forEach(key => {
+          this.controllerSet[key].destroy();
         });
 
-        this.subjectMap = null;
+        this.controllerSet = null;
       }
+
       createScope(
         name: string,
         reducer: Reducer,
@@ -90,20 +91,21 @@ export function connect(options: Options) {
       ) {
         this.isScopeRoot = true;
         RxStore.injectScope(name, options.initState, reducer, cache, log);
-        this.subjectMap[name] = this.bindListener(RxStore.getScope(name));
+        this.controllerSet[name] = this.bindListener(RxStore.getScope(name));
       }
+
       connectScope(scopes) {
         Object.keys(scopes)
           .filter(key => key !== options.scopeName)
           .forEach(key => {
-            const _subject = RxStore.getScope(key);
-            this.subjectMap[key] = this.bindListener(_subject);
+            const scopeController = RxStore.getScope(key);
+            this.controllerSet[key] = this.bindListener(scopeController);
           });
       }
 
       bindListener(subject: ScopeController) {
-        const bindedSubject: ReactSubject = subject;
-        bindedSubject.listen = key => {
+        const bindedController: ReactScopeController = subject;
+        bindedController.listen = key => {
           let _mapper;
 
           const _do = observer => {
@@ -123,34 +125,36 @@ export function connect(options: Options) {
             pipe
           };
         };
-        return bindedSubject;
+        return bindedController;
       }
-      mapStateToProps(subject) {
+
+      mapStateToProps(controllerSet) {
         if (this.isConnected) {
           Object.keys(this.connectOptions).forEach(key => {
             const mapProps = this.connectOptions[key];
-            const subj = subject[key];
+            const controller = controllerSet[key];
             if (typeof mapProps === 'string') {
-              this.listenState(subj, toCamelcase(mapProps));
+              this.listenState(controller, toCamelcase(mapProps));
             } else if (isPlainObject(mapProps)) {
               this.listenState(
-                subj,
+                controller,
                 toCamelcase(mapProps.propName),
                 mapProps.path
               );
             } else if (Array.isArray(mapProps)) {
               mapProps.forEach(item => {
                 if (typeof item === 'string') {
-                  this.listenState(subj, toCamelcase(item));
+                  this.listenState(controller, toCamelcase(item));
                 } else if (isPlainObject(item)) {
-                  this.listenState(subj, toCamelcase(item.propName), item.path);
+                  this.listenState(controller, toCamelcase(item.propName), item.path);
                 }
               });
             }
           });
         }
       }
-      listenState(subject: ReactSubject, name, path = [name]) {
+
+      listenState(subject: ReactScopeController, name: string, path = [name]) {
         this.stateToPropsNames.push(name);
         subject.listen(normalizePath(path)).do(d => {
           this.setState({
@@ -158,6 +162,7 @@ export function connect(options: Options) {
           });
         });
       }
+
       getPropsInState() {
         const props = {};
         this.stateToPropsNames.forEach(name => {
@@ -165,26 +170,31 @@ export function connect(options: Options) {
         });
         return props;
       }
+
       getInjectProps() {
-        const subjectsKey = Object.keys(this.subjectMap);
+        // subject is deprecated, use controller(s) instead
+        const controllerKeys = Object.keys(this.controllerSet);
         let props;
-        if (subjectsKey.length === 1) {
-          const subject = this.subjectMap[subjectsKey[0]];
+        if (controllerKeys.length === 1) {
+          const controller = this.controllerSet[controllerKeys[0]];
           props = {
-            listen: subject.listen,
-            dispatch: subject.dispatch,
-            subject
+            listen: controller.listen,
+            dispatch: controller.dispatch,
+            subject: controller,
+            controller,
           };
         } else {
           props = {
-            subject: this.subjectMap
+            subject: this.controllerSet,
+            controllers: this.controllerSet,
           };
         }
         return props;
       }
+
       render() {
         return (
-          <WrapComponent
+          <ConnectedComponent
             {...this.getPropsInState()}
             {...this.getInjectProps()}
             {...this.props}

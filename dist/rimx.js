@@ -308,16 +308,15 @@ function combineReducers(reducers) {
 
 var RxStore = new RxStoreFactory();
 function connect(options) {
-    // const { scopeName, initState, connectScopes, reducer, cache } = this.options;
     if (options.scope) {
         options.scopeName = options.scope;
     }
-    return function wrap(WrapComponent) {
+    return function wrap(ConnectedComponent) {
         return /** @class */ (function (_super) {
             __extends(WrappedComponent, _super);
             function WrappedComponent(props, context) {
                 var _this = _super.call(this, props, context) || this;
-                _this.subjectMap = {};
+                _this.controllerSet = {};
                 _this.state = {};
                 _this.isConnected = false;
                 _this.isScopeRoot = false;
@@ -333,7 +332,7 @@ function connect(options) {
                 return _this;
             }
             WrappedComponent.prototype.componentWillMount = function () {
-                this.mapStateToProps(this.subjectMap);
+                this.mapStateToProps(this.controllerSet);
             };
             WrappedComponent.prototype.shouldComponentUpdate = function (nextProps, nextState) {
                 if (nextProps !== this.props || nextState !== this.state) {
@@ -343,28 +342,28 @@ function connect(options) {
             };
             WrappedComponent.prototype.componentWillUnmount = function () {
                 var _this = this;
-                Object.keys(this.subjectMap).forEach(function (key) {
-                    _this.subjectMap[key].destroy();
+                Object.keys(this.controllerSet).forEach(function (key) {
+                    _this.controllerSet[key].destroy();
                 });
-                this.subjectMap = null;
+                this.controllerSet = null;
             };
             WrappedComponent.prototype.createScope = function (name, reducer, cache, log) {
                 this.isScopeRoot = true;
                 RxStore.injectScope(name, options.initState, reducer, cache, log);
-                this.subjectMap[name] = this.bindListener(RxStore.getScope(name));
+                this.controllerSet[name] = this.bindListener(RxStore.getScope(name));
             };
             WrappedComponent.prototype.connectScope = function (scopes) {
                 var _this = this;
                 Object.keys(scopes)
                     .filter(function (key) { return key !== options.scopeName; })
                     .forEach(function (key) {
-                    var _subject = RxStore.getScope(key);
-                    _this.subjectMap[key] = _this.bindListener(_subject);
+                    var scopeController = RxStore.getScope(key);
+                    _this.controllerSet[key] = _this.bindListener(scopeController);
                 });
             };
             WrappedComponent.prototype.bindListener = function (subject) {
-                var bindedSubject = subject;
-                bindedSubject.listen = function (key) {
+                var bindedController = subject;
+                bindedController.listen = function (key) {
                     var _mapper;
                     var _do = function (observer) {
                         var subscription = subject.subscribe(observer, key, _mapper);
@@ -381,27 +380,27 @@ function connect(options) {
                         pipe: pipe
                     };
                 };
-                return bindedSubject;
+                return bindedController;
             };
-            WrappedComponent.prototype.mapStateToProps = function (subject) {
+            WrappedComponent.prototype.mapStateToProps = function (controllerSet) {
                 var _this = this;
                 if (this.isConnected) {
                     Object.keys(this.connectOptions).forEach(function (key) {
                         var mapProps = _this.connectOptions[key];
-                        var subj = subject[key];
+                        var controller = controllerSet[key];
                         if (typeof mapProps === 'string') {
-                            _this.listenState(subj, toCamelcase(mapProps));
+                            _this.listenState(controller, toCamelcase(mapProps));
                         }
                         else if (isPlainObject(mapProps)) {
-                            _this.listenState(subj, toCamelcase(mapProps.propName), mapProps.path);
+                            _this.listenState(controller, toCamelcase(mapProps.propName), mapProps.path);
                         }
                         else if (Array.isArray(mapProps)) {
                             mapProps.forEach(function (item) {
                                 if (typeof item === 'string') {
-                                    _this.listenState(subj, toCamelcase(item));
+                                    _this.listenState(controller, toCamelcase(item));
                                 }
                                 else if (isPlainObject(item)) {
-                                    _this.listenState(subj, toCamelcase(item.propName), item.path);
+                                    _this.listenState(controller, toCamelcase(item.propName), item.path);
                                 }
                             });
                         }
@@ -428,25 +427,28 @@ function connect(options) {
                 return props;
             };
             WrappedComponent.prototype.getInjectProps = function () {
-                var subjectsKey = Object.keys(this.subjectMap);
+                // subject is deprecated, use controller(s) instead
+                var controllerKeys = Object.keys(this.controllerSet);
                 var props;
-                if (subjectsKey.length === 1) {
-                    var subject = this.subjectMap[subjectsKey[0]];
+                if (controllerKeys.length === 1) {
+                    var controller = this.controllerSet[controllerKeys[0]];
                     props = {
-                        listen: subject.listen,
-                        dispatch: subject.dispatch,
-                        subject: subject
+                        listen: controller.listen,
+                        dispatch: controller.dispatch,
+                        subject: controller,
+                        controller: controller,
                     };
                 }
                 else {
                     props = {
-                        subject: this.subjectMap
+                        subject: this.controllerSet,
+                        controllers: this.controllerSet,
                     };
                 }
                 return props;
             };
             WrappedComponent.prototype.render = function () {
-                return (createElement(WrapComponent, __assign({}, this.getPropsInState(), this.getInjectProps(), this.props)));
+                return (createElement(ConnectedComponent, __assign({}, this.getPropsInState(), this.getInjectProps(), this.props)));
             };
             return WrappedComponent;
         }(Component));
