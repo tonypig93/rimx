@@ -6,7 +6,7 @@
   "jsnext:main": "lib/index.js",
   "module": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "build": "webpack --mode production",
     "build:r": "rollup -c"
   },
@@ -76,6 +76,14 @@
     ]
   },
   "jest": {
+    "globals": {
+      "ts-jest": {
+        "useBabelrc": true
+      }
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}"
+    ],
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
