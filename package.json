@@ -6,8 +6,9 @@
   "jsnext:main": "lib/index.js",
   "module": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rollup -c"
+    "test": "jest",
+    "build": "webpack --mode production",
+    "build:r": "rollup -c"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "rxjs": "^5.5.0"
   },
   "devDependencies": {
+    "@types/jest": "^23.3.2",
     "@types/react": "^16.0.40",
     "babel": "^6.23.0",
     "babel-core": "^6.26.0",
@@ -43,13 +45,19 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "immutable": "^3.8.2",
+    "jest": "^23.6.0",
     "react": "^16.2.0",
     "rimraf": "^2.6.2",
     "rollup-plugin-babel": "^3.0.7",
     "rollup-plugin-node-resolve": "^3.3.0",
     "rollup-plugin-typescript2": "^0.16.1",
     "rxjs": "5.5.11",
-    "typescript": "^2.7.2"
+    "through2": "^2.0.3",
+    "ts-jest": "^23.1.4",
+    "ts-loader": "^4.1.0",
+    "typescript": "^2.7.2",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.12"
   },
   "babel": {
     "presets": [
@@ -62,6 +70,28 @@
         }
       ],
       "react"
+    ]
+  },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "useBabelrc": true
+      }
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
     ]
   }
 }
