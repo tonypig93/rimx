@@ -1,5 +1,7 @@
 # `RimX`
-[![Build Status](https://www.travis-ci.org/tonypig93/rimx.svg?branch=master)](https://www.travis-ci.org/tonypig93/rimx)
+
+[![Travis (.org)](https://img.shields.io/travis/tonypig93/rimx/master.svg?style=flat-square)](https://www.travis-ci.org/tonypig93/rimx)
+[![Coverage Status](https://img.shields.io/coveralls/github/tonypig93/rimx/master.svg?style=flat-square)](https://coveralls.io/github/tonypig93/rimx?branch=master)
 
 A state management tool for React, based on RxJS and ImmutableJS.
 

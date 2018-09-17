@@ -2,10 +2,13 @@ language: node_js
 node_js:
   - "9"
 install: yarn
-script: npm run build
+script:
+  - npm run build
 branches:
   only:
   - master
 cache:
   directories:
     - "$HOME/.npm"
+after_success:
+- npm run coveralls

@@ -7,11 +7,12 @@
   "module": "src/index.js",
   "scripts": {
     "test": "jest --watch",
+    "cover": "jest --coverage --coverageReporters=text-lcov | coveralls",
     "build": "rollup -c"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tonypig93/rimx.git"
+    "url": "git@github.com:tonypig93/rimx.git"
   },
   "keywords": [
     "react",
@@ -43,6 +44,7 @@
     "babel-preset-latest": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
+    "coveralls": "^3.0.2",
     "immutable": "^3.8.2",
     "jest": "^23.6.0",
     "react": "^16.2.0",
@@ -79,7 +81,6 @@
         "skipBabel": true
       }
     },
-    "collectCoverage": true,
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,ts,tsx}"
     ],
