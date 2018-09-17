@@ -1,5 +1,5 @@
 # `RimX`
-[![Build Status](https://www.travis-ci.org/tonypig93/rimx.svg?branch=master)
+[![Build Status](https://www.travis-ci.org/tonypig93/rimx.svg?branch=master)](https://www.travis-ci.org/tonypig93/rimx)
 A state management tool for React, based on RxJS and ImmutableJS.
 
 `RimX`是一个类似`redux`的状态管理工具，不同的是`RimX`没有`action` `reducer`等概念，使用起来较为简单。你可以利用`RxJS`强大的流处理能力来管理`react`组件的状态变化，另一方面`ImmutableJS`可以在最大限度上保证状态之间的独立性，防止因某一状态改变时引起其他不相干组件的更新。
