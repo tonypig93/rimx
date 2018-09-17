@@ -6,3 +6,6 @@ script: npm run build
 branches:
   only:
   - master
+cache:
+  directories:
+    - "$HOME/.npm"
