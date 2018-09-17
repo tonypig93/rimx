@@ -7,8 +7,7 @@
   "module": "src/index.js",
   "scripts": {
     "test": "jest --watch",
-    "build": "webpack --mode production",
-    "build:r": "rollup -c"
+    "build": "rollup -c"
   },
   "repository": {
     "type": "git",
