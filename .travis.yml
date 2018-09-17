@@ -3,6 +3,7 @@ node_js:
   - "9"
 install: yarn
 script:
+  - npm test
   - npm run build
 branches:
   only:
@@ -11,4 +12,4 @@ cache:
   directories:
     - "$HOME/.npm"
 after_success:
-- npm run coveralls
+- npm run cover
