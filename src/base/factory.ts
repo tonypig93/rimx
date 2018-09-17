@@ -1,7 +1,7 @@
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import * as Immutable from 'immutable';
 
-import { ScopeController } from './scope-controller';
+import { ScopeController } from './scopeController';
 import { Reducer, ScopeState } from './types';
 import { normalizePath } from './utils';
 
@@ -19,13 +19,13 @@ export class RxStoreFactory {
    * @param {object} initialState
    * @memberof RxStoreFactory
    */
-  injectScope(
+  injectScope = (
     scopeName: string,
     initialState,
-    reducer: Reducer,
+    reducer?: Reducer,
     cacheState = false,
     log = false
-  ) {
+  ) => {
     if (!scopeName) {
       throw new Error('You should provide a scope name to create a scope');
     }
@@ -65,7 +65,7 @@ export class RxStoreFactory {
    * 生成当前store整体的快照，用于监视store状态。
    * 来回切换多个component发现subscription或者observers只增不减时，需要检查组件内是否释放了资源。
    */
-  takeSnapshot() {
+  takeSnapshot = () => {
     console.group('RxStore snapshot');
     console.log('root state: ', this.store.value.toJS());
     console.log(
@@ -79,7 +79,7 @@ export class RxStoreFactory {
    * @param {string} path
    * @memberof RxStoreFactory
    */
-  deleteScope(path: string) {
+  deleteScope = (path: string) => {
     const nextState = this.store.value.deleteIn(path.split('.'));
     this.store.next(nextState);
   }
@@ -100,21 +100,20 @@ export class RxStoreFactory {
    * @returns {object}
    * @memberof RxStoreFactory
    */
-  createState(
+  private createState(
     initialState = {},
     reducer,
     cacheState: boolean,
     log: boolean
   ): ScopeState {
-    const scopeId = this.scopeId++; // eslint-disable-line
-    return Object.assign(initialState, {
-      __scopeId: scopeId,
+    return {
+      state: initialState,
+      __scopeId: this.scopeId++,
       __reducer: reducer,
       __cached: cacheState,
-      __log: log
-    });
+      __log: log,
+    };
   }
-
   /**
    * 生成当前scope的快照
    * @param {string[]} pluckPath
@@ -130,7 +129,7 @@ export class RxStoreFactory {
    * @returns {object}
    * @memberof RxStoreFactory
    */
-  getScope(scopeName: string) {
+  getScopeController = (scopeName: string) => {
     const state = this._getSnapshot(scopeName);
     const scopeId = state.get('__scopeId'); // eslint-disable-line
     const log = state.get('__log');
@@ -143,12 +142,12 @@ export class RxStoreFactory {
    * 销毁store
    * @memberof RxStoreFactory
    */
-  destroy() {
+  destroy = () => {
     // TO DO: prevent memory leak
     this.store.complete();
   }
 
-  destroyScope(scopeName) {
+  destroyScope = (scopeName) => {
     this.deleteScope(scopeName);
   }
 }

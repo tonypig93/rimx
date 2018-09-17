@@ -10,7 +10,6 @@ export function combineReducers(reducers: ReducersSource) {
     if (typeof reducers[type] === 'function') {
       return reducers[type](state, action);
     }
-    console.warn('Expected reducer to be a function');
-    return state;
+    throw new Error('Expected the reducer to be a function');
   };
 }

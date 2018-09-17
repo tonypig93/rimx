@@ -4813,6 +4813,19 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-is@^16.5.1:
+  version "16.5.1"
+  resolved "http://registry.npm.taobao.org/react-is/download/react-is-16.5.1.tgz#c6e8734fd548a22e1cef4fd0833afbeb433b85ee"
+
+react-test-renderer@^16.5.1:
+  version "16.5.1"
+  resolved "http://registry.npm.taobao.org/react-test-renderer/download/react-test-renderer-16.5.1.tgz#17f020fb0cf884cadebb5240d9d9c23452f18299"
+  dependencies:
+    object-assign "^4.1.1"
+    prop-types "^15.6.2"
+    react-is "^16.5.1"
+    schedule "^0.4.0"
+
 react@^16.2.0:
   version "16.5.1"
   resolved "http://registry.npm.taobao.org/react/download/react-16.5.1.tgz#8cb8e9f8cdcb4bde41c9a138bfbf907e66132372"

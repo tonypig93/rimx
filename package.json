@@ -6,7 +6,7 @@
   "jsnext:main": "lib/index.js",
   "module": "src/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --watch",
     "build": "webpack --mode production",
     "build:r": "rollup -c"
   },
@@ -47,6 +47,7 @@
     "immutable": "^3.8.2",
     "jest": "^23.6.0",
     "react": "^16.2.0",
+    "react-test-renderer": "^16.5.1",
     "rimraf": "^2.6.2",
     "rollup-plugin-babel": "^3.0.7",
     "rollup-plugin-node-resolve": "^3.3.0",
@@ -75,7 +76,7 @@
   "jest": {
     "globals": {
       "ts-jest": {
-        "useBabelrc": true
+        "skipBabel": true
       }
     },
     "collectCoverageFrom": [

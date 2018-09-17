@@ -1,6 +1,6 @@
 export interface Action {
   type: string;
-  payload: any;
+  payload?: any;
 }
 
 export type Reducer = (state: any, action: Action) => any;
@@ -10,4 +10,5 @@ export interface ScopeState {
   __cached: boolean;
   __log: boolean;
   __reducer?: Reducer;
+  state: Object;
 }

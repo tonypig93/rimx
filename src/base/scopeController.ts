@@ -27,8 +27,9 @@ export class ScopeController {
   ) {
     this.stateObservable = store
       .asObservable()
-      .map(rootState => rootState.get(scopeName));
+      .map(rootState => rootState.getIn([scopeName, 'state']));
   }
+
   getScopeState(): Immutable.Map<string, any> {
     return this.store.value.get(this.scopeName);
   }
@@ -42,7 +43,7 @@ export class ScopeController {
   subscribe(
     observer,
     key: string[],
-    mapper: (ob: Observable<any>) => Observable<any>
+    mapper?: (ob: Observable<any>) => Observable<any>
   ) {
     // root.takeSnapshot();
     let observable = this.stateObservable;
@@ -65,7 +66,7 @@ export class ScopeController {
   private _updater(nextState, merge, log) {
     this.updateStore(this.scopeName, nextState, merge);
     if (log) {
-      console.log(`(${this.stateChangeCounter}) After change`);
+      console.log(`[${this.stateChangeCounter}] After change`);
       console.log(nextState);
     }
     this.stateChangeCounter++;
@@ -75,33 +76,36 @@ export class ScopeController {
     if (this.closed) {
       return;
     }
-    const prevState = this.getScopeState();
-    const showLog = prevState.get('__log');
-    let nextState;
+    const prevScopeState = this.getScopeState();
+    const showLog = prevScopeState.get('__log');
+    let nextScopeState, nextState;
+
     if (typeof input === 'function') {
-      nextState = input(prevState);
+      nextState = input(prevScopeState.get('state'))
     } else {
       nextState = input;
     }
 
+    nextScopeState = prevScopeState.set('state', Immutable.fromJS(nextState));
+
     if (showLog) {
-      console.log(`(${this.stateChangeCounter}) Before change`);
+      console.log(`[${this.stateChangeCounter}] Before change`);
       if (action) {
-        console.log(`(${this.stateChangeCounter}) Action`);
+        console.log(`[${this.stateChangeCounter}] Action`);
         console.log(action);
       }
-      console.log(prevState);
+      console.log(prevScopeState);
     }
-    if (nextState instanceof Observable) {
-      nextState.subscribe(_data => {
-        this._updater(_data, merge, showLog);
+    if (nextScopeState.get('state') instanceof Observable) {
+      nextScopeState.get('state').subscribe(_data => {
+        this._updater(nextScopeState.set('state', _data), merge, showLog);
       });
     } else {
-      this._updater(nextState, merge, showLog);
+      this._updater(nextScopeState, merge, showLog);
     }
   }
 
-  dispatch = (action: Action, merge) => {
+  dispatch = (action: Action, merge?: boolean) => {
     const scopeState = this.getScopeState();
     const reducer = scopeState.get('__reducer');
 
@@ -109,7 +113,7 @@ export class ScopeController {
   };
 
   snapshot() {
-    return this.getScopeState();
+    return this.getScopeState().get('state');
   }
 
   destroy() {

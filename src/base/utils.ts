@@ -11,7 +11,7 @@ function isNativeType(variable: any) {
 
 export function compareFn(a: any, b: any) {
   if (isNativeType(a) && isNativeType(b)) {
-    return a === b;
+    return Object.is(a, b);
   }
   return is(a, b);
 }

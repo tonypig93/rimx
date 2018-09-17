@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`React bindings create a scope with a component 1`] = `
+<div
+  onClick={[Function]}
+>
+  tony
+</div>
+`;
+
+exports[`React bindings create a scope with a component 2`] = `
+<div
+  onClick={[Function]}
+>
+  tom
+</div>
+`;
+
+exports[`React bindings make a component link to the scope 1`] = `
+<div
+  onClick={[Function]}
+>
+  tony
+</div>
+`;
+
+exports[`React bindings make a component link to the scope 2`] = `
+<div>
+  tony
+</div>
+`;
+
+exports[`React bindings make a component link to the scope 3`] = `
+<div
+  onClick={[Function]}
+>
+  tom
+</div>
+`;
+
+exports[`React bindings make a component link to the scope 4`] = `
+<div>
+  tom
+</div>
+`;

@@ -4,9 +4,8 @@ import { Observable } from 'rxjs/Observable';
 
 import { normalizePath, isPlainObject, toCamelcase } from './base/utils';
 import { RxStoreFactory } from './base/factory';
-import { ScopeController } from './base/scope-controller';
+import { ScopeController } from './base/scopeController';
 import { Reducer, Action } from './base/types';
-export { combineReducers } from './base/combineReducers';
 
 interface ReactScopeController extends ScopeController {
   listen?: (
@@ -22,9 +21,9 @@ interface ReactScopeController extends ScopeController {
 }
 
 interface Options {
-  scope: string;
-  scopeName: string;
-  initState: any;
+  scope?: string;
+  scopeName?: string;
+  initState?: any;
   connectScopes?: {
     [scopeName: string]: any;
   };
@@ -39,8 +38,8 @@ export function connect(options: Options) {
   if (options.scope) {
     options.scopeName = options.scope;
   }
-  return function wrap(ConnectedComponent) {
-    return class WrappedComponent extends React.Component<any, any> {
+  return function wrap(WrappedComponent) {
+    return class ConnectedComponent extends React.Component<any, any> {
       controllerSet: { [key: string]: ReactScopeController } = {};
       state = {};
       isConnected = false;
@@ -91,14 +90,14 @@ export function connect(options: Options) {
       ) {
         this.isScopeRoot = true;
         RxStore.injectScope(name, options.initState, reducer, cache, log);
-        this.controllerSet[name] = this.bindListener(RxStore.getScope(name));
+        this.controllerSet[name] = this.bindListener(RxStore.getScopeController(name));
       }
 
       connectScope(scopes) {
         Object.keys(scopes)
           .filter(key => key !== options.scopeName)
           .forEach(key => {
-            const scopeController = RxStore.getScope(key);
+            const scopeController = RxStore.getScopeController(key);
             this.controllerSet[key] = this.bindListener(scopeController);
           });
       }
@@ -194,7 +193,7 @@ export function connect(options: Options) {
 
       render() {
         return (
-          <ConnectedComponent
+          <WrappedComponent
             {...this.getPropsInState()}
             {...this.getInjectProps()}
             {...this.props}
