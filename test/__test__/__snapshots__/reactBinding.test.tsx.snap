@@ -64,6 +64,32 @@ exports[`React bindings listen state change and using pipe 2`] = `
 </div>
 `;
 
+exports[`React bindings make a component link to multi scopes 1`] = `
+<div
+  onClick={[Function]}
+>
+  <span>
+    tony
+  </span>
+  <span>
+    jack
+  </span>
+</div>
+`;
+
+exports[`React bindings make a component link to multi scopes 2`] = `
+<div
+  onClick={[Function]}
+>
+  <span>
+    mary
+  </span>
+  <span>
+    jack
+  </span>
+</div>
+`;
+
 exports[`React bindings make a component link to the scope 1`] = `
 <div
   onClick={[Function]}
@@ -93,5 +119,31 @@ exports[`React bindings make a component link to the scope 4`] = `
   onClick={[Function]}
 >
   tom
+</div>
+`;
+
+exports[`React bindings make a component link to the scope and get two props 1`] = `
+<div
+  onClick={[Function]}
+>
+  <span>
+    tony
+  </span>
+  <span>
+    
+  </span>
+</div>
+`;
+
+exports[`React bindings make a component link to the scope and get two props 2`] = `
+<div
+  onClick={[Function]}
+>
+  <span>
+    tony
+  </span>
+  <span>
+    A,B,C
+  </span>
 </div>
 `;

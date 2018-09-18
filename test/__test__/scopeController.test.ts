@@ -1,13 +1,24 @@
 import * as Immutable from 'immutable';
+import { Observable } from 'rxjs';
 import { RxStoreFactory } from '../../src/base/factory';
+import { combineReducers } from '../../src/base/combineReducers';
 
 let store: RxStoreFactory;
 const scopeName = 'test';
-const reducer = function reducer(state, action) {
+function reducer1(state, action) {
   return {
     text: 'world'
   };
 };
+function reducer2(state, action) {
+  return Observable
+    .of({ text: 'world!' })
+    .delay(100);
+}
+const reducer = combineReducers({
+  test: reducer1,
+  async: reducer2,
+});
 
 beforeEach(() => {
   store = new RxStoreFactory();
@@ -25,6 +36,10 @@ describe('ScopeController', () => {
       done();
     });
   });
+
+  test('create a scope controller with a wrong name', () => {
+    expect(() => store.getScopeController('not exist')).toThrow();
+  })
 
   test('change the state directly by an object', () => {
     const controller = store.getScopeController(scopeName);
@@ -59,10 +74,11 @@ describe('ScopeController', () => {
   test('change the state by the reducer', () => {
     const controller = store.getScopeController(scopeName);
 
-    controller.dispatch(null);
+    controller.dispatch({ type: 'test' });
 
     expect(store.store.value.getIn([scopeName, 'state', 'text'])).toBe('world');
   });
+
 
   test('get the scope state', () => {
     const controller = store.getScopeController(scopeName);
@@ -118,5 +134,23 @@ describe('ScopeController', () => {
     expect(store.store.observers.length).toBe(0);
   });
 
+  test('change state with an async reducer', done => {
+    const controller = store.getScopeController(scopeName);
+
+    controller.dispatch({ type: 'async' });
+
+    const observer = jest
+      .fn()
+      .mockImplementationOnce(name => {
+        expect(name).toBe('hello');
+      })
+      .mockImplementationOnce(name => {
+        expect(name).toBe('world!');
+        done();
+      })
+    // expect(store.store.value.getIn([scopeName, 'state', 'text'])).toBe('world');
+    controller.subscribe(observer, ['text']);
+
+  })
 
 });

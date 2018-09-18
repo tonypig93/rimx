@@ -66,13 +66,10 @@ export class RxStoreFactory {
    * 来回切换多个component发现subscription或者observers只增不减时，需要检查组件内是否释放了资源。
    */
   takeSnapshot = () => {
-    console.group('RxStore snapshot');
-    console.log('root state: ', this.store.value.toJS());
-    console.log(
-      `subject observers(${this.store.observers.length}): `,
-      this.store.observers
-    );
-    console.groupEnd();
+    return {
+      store: this.store.value.toJS(),
+      observers: this.store.observers,
+    };
   }
   /**
    * 删除scope
@@ -131,21 +128,22 @@ export class RxStoreFactory {
    */
   getScopeController = (scopeName: string) => {
     const state = this._getSnapshot(scopeName);
+    if (!state) {
+      throw new Error('The scope you have required does not exist!');
+    }
     const scopeId = state.get('__scopeId'); // eslint-disable-line
     const log = state.get('__log');
-    if (!scopeId) {
-      throw new Error('The state path you have required does not exist!');
-    }
+
     return new ScopeController(scopeName, this.store, this.updateState);
   }
-  /**
-   * 销毁store
-   * @memberof RxStoreFactory
-   */
-  destroy = () => {
-    // TO DO: prevent memory leak
-    this.store.complete();
-  }
+  // /**
+  //  * 销毁store
+  //  * @memberof RxStoreFactory
+  //  */
+  // destroy = () => {
+  //   // TO DO: prevent memory leak
+  //   this.store.complete();
+  // }
 
   destroyScope = (scopeName) => {
     this.deleteScope(scopeName);
