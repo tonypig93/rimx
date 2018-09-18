@@ -1,0 +1,12 @@
+src/
+test/
+coverage/
+docs/
+.rpt2_cache/
+.babelrc
+.editorconfig
+.gitignore
+.prettierrc
+.travis.yml
+rollup.config.js
+tsconfig.json
