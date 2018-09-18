@@ -2,11 +2,12 @@
 
 [![Travis (.org)](https://img.shields.io/travis/tonypig93/rimx/master.svg?style=flat-square)](https://www.travis-ci.org/tonypig93/rimx)
 [![Coverage Status](https://img.shields.io/coveralls/github/tonypig93/rimx/master.svg?style=flat-square)](https://coveralls.io/github/tonypig93/rimx?branch=master)
+[![NPM](https://img.shields.io/npm/v/rimx.svg?style=flat-square)](https://www.npmjs.com/package/rimx)
 
 A state management tool for React, based on RxJS and ImmutableJS.
 
-`RimX`是一个类似`redux`的状态管理工具，不同的是`RimX`没有`action` `reducer`等概念，使用起来较为简单。你可以利用`RxJS`强大的流处理能力来管理`react`组件的状态变化，另一方面`ImmutableJS`可以在最大限度上保证状态之间的独立性，防止因某一状态改变时引起其他不相干组件的更新。
-`RimX`本身是个小巧的库，`gzip`后仅3KB。`RimX`虽然运行在`react`之上，但是其底层结构完全可以被用于其他框架当中。
+`RimX`是一个类似`redux`的状态管理工具，不同的是`RimX`没有`action` `reducer`等概念，使用起来较为简单。你可以利用`RxJS`强大的流处理能力来管理`react`组件的状态变化，另一方面`ImmutableJS`可以使状态更新变的更简单。
+`RimX`本身是个小巧的库，`gzip`后仅3KB，本身提供了`react`集成。
 
 # 依赖
 - `RxJS` >= 5.5.0
@@ -34,10 +35,10 @@ yarn add rimx
 
 ```
 connect({
-  scopeName: string;
+  scope: string;
   initState: any,
   connectScopes?: {
-    [scopeName: string]: any,
+    [scope: string]: any,
   };
   reducer?: Reducer;
   cache?: boolean;
@@ -47,8 +48,8 @@ connect({
 
 属性|说明|默认值
 |:----:|:----|:----:|
-|`scopeName`|`rimx`中的状态都在一个`store`当中，但是你可以将其划分为多个`scope`，举例来说一个业务模块中的多个组件可以属于同一个`scope`，`scope`之间不共享`state`与`reducer`。| --|
-|`initState`|指定`scopeName`时表示创建`scope`，然后就需要提供初始状态，这里需要注意的是，`initState`会被转换为`Immutable`结构，例如`{ list: [] }`中的`list`会被转成`Immutable.List`，如果你希望`list`是原生数组，那么需要用`Immutable.Map({ list: [] })`包装起来。|`{}`|
+|`scope`|`rimx`中的状态都在一个`store`当中，但是你可以将其划分为多个`scope`，举例来说一个业务模块中的多个组件可以属于同一个`scope`，`scope`之间不共享`state`与`reducer`。| --|
+|`initState`|指定`scope`时表示创建`scope`，然后就需要提供初始状态，这里需要注意的是，`initState`会被转换为`Immutable`结构，例如`{ list: [] }`中的`list`会被转成`Immutable.List`，如果你希望`list`是原生数组，那么需要用`Immutable.Map({ list: [] })`包装起来。|`{}`|
 |`connectScopes`|创建了`scope`之后，其他组件需要连接到这个`scope`当中才能获取或者修改`scope state`，传入`connectScopes`的是一个对象，`key`表示需要连接到的`scope`， `value`有多种形式，后面有举例。|--|
 |`reducer`|类似于`redux`的`reducer`，写法基本相同。|--|
 |`cache`|是否缓存当前`scope`的`state`，当`scope`被重新创建时会读取上一次的`state`|`false`|
@@ -71,7 +72,7 @@ const STATE = {
 };
 
 export connect({
-  scopeName: 'global',
+  scope: 'global',
   initState: STATE,
 })
 ```
@@ -122,7 +123,7 @@ connectScopes: {
 
 ```
 
-如果要修改`state`，有两种方法，一种是直接在`scope`的控制对象`subject`上修改，另一种是用`reducer`。
+如果要修改`state`，有两种方法，一种是直接在`scope`的控制对象`controller`上修改，另一种是用`reducer`。
 ```
 // 直接修改
 import React from 'react';
@@ -130,7 +131,7 @@ import { connect } from 'rimx';
 
 class B extends React.Component {
   handleChangeState = () => {
-    this.props.subject.next(() => ({
+    this.props.controller.next(() => ({
       profile: {
         age: 20,
       },
@@ -150,16 +151,16 @@ export connect({
 });
 ```
 
-每个被`connect`包裹后的组件都会获得一个`subject`对象，这个对象包含了对`scope`的全部操作。
+每个被`connect`包裹后的组件都会获得一个`controller`对象，这个对象包含了对`scope`的全部操作。
 
-> 当`connect`的参数里只有`scopeName`，或者`connectScopes`只有连接了一个`scope`时，或者`connectScopes`只连接了一个`scope`并且该`scope`与`scopeName`相同时，`this.props.subject`指向`scope subject`本身，如果连接到了多个`scope`，需要提供`scopeName`来获取`scope subject`，例如`this.props.subject['global']`。
+> 当`connect`的参数里只有`scope`，或者`connectScopes`只有连接了一个`scope`时，或者`connectScopes`只连接了一个`scope`并且该`scope`与`scope`相同时，`this.props.controller`指向`scope controller`本身，如果连接到了多个`scope`，需要提供`scope name`来获取`scope controller`，例如`this.props.controllers['global']`。
 
-`subject`本身是一个`RxJS Subject`对象，但是重载了`next`和`subscribe`这两个方法，其包含的数据为`scope state`：
-- **`subject.next()`**
-  `subject.next()`可以直接传入一个新的`state`，或者传入一个函数，函数的参数为当前`state`。调用`next`之后可以同步修改`state`。
-- **`subject.listen()`**
+`controller`本身是一个`RxJS Subject`对象，但是重载了`next`和`subscribe`这两个方法，其包含的数据为`scope state`：
+- **`controller.next()`**
+  `controller.next()`可以直接传入一个新的`state`，或者传入一个函数，函数的参数为当前`state`。调用`next`之后可以同步修改`state`。
+- **`controller.listen()`**
   `listen`接收一个路径，表示监听该路径指向数据的变化，`listen`要和`do`一起搭配使用，变化之后的数据会传入`do`。`listen`可以用于获取`state`中的任何数据，而不局限于`props`中提供的，不传入参数表示监听整个`state`。
-- **`subject.listen().do()`**
+- **`controller.listen().do()`**
   `do`接收一个`observer`，用于响应数据变化，当`state`发生变化时会触发`do`的回调。
 
   ```
@@ -168,14 +169,14 @@ export connect({
 
   class B extends React.Component {
     componentDidMount() {
-      this.props.subject.listen(['profile', 'age']).do(data => {
+      this.props.controller.listen(['profile', 'age']).do(data => {
         console.log(data); // 18 -> 20;
         // 首次监听时会获取`profile.age`的初始值18，之后当触发`handleChangeState`时，会获得新值20。
         // 其他字段例如profile.name的变化不会触发这里的回调。
       });
     }
     handleChangeState = () => {
-      this.props.subject.next(() => ({
+      this.props.controller.next(() => ({
         profile: {
           age: 20,
         },
@@ -195,7 +196,7 @@ export connect({
   });
   ```
 
-- **`subject.listen().pipe().do()`**
+- **`controller.listen().pipe().do()`**
   `pipe`用于对数据流进行提前处理，可以接入任何`rxjs`的操作符，例如过滤低于20的值，只有当`age`大于20时才会响应回调。
 
   ```
@@ -204,7 +205,7 @@ export connect({
 
   class B extends React.Component {
     componentDidMount() {
-      this.props.subject
+      this.props.controller
         .listen(['profile', 'age'])
         .pipe(ob => ob.filter(v => v 20))
         .do(data => {
@@ -214,7 +215,7 @@ export connect({
     }
     handleChangeState = () => {
       const nextAge = state.getIn(['profile', 'age']) + 1;
-      this.props.subject.next(() => ({
+      this.props.controller.next(() => ({
         profile: {
           age: nextAge,
         },
@@ -234,10 +235,10 @@ export connect({
   });
   ```
 
-- **`subject.dispatch()`**
+- **`controller.dispatch()`**
   用于执行`reducer`，接收一个`action`作为参数，第二个参数用于在`merge`和`update`之间选择状态的更新方式。
 
-> 为了简化使用，当`subject`指向`scope subject`时，会将`listen`和`dispatch`直接注入`props`。
+> 为了简化使用，当`controller`指向`scope controller`时，会将`listen`和`dispatch`直接注入`props`。
 
 不仅仅是`B`组件，`A`组件也可以完成上面的全部操作，只需像`B`一样配置`connectScopes`。
 
@@ -252,7 +253,7 @@ class A extends React.Component {
     });
   }
   handleChangeState = () => {
-    this.props.subject.next(() => ({
+    this.props.controller.next(() => ({
       profile: {
         age: 20,
       },
@@ -272,7 +273,7 @@ const STATE = {
 };
 
 export connect({
-  scopeName: 'global',
+  scope: 'global',
   initState: STATE,
   connectScopes: {
     global: 'profile',
@@ -344,7 +345,7 @@ const STATE = {
 };
 
 export connect({
-  scopeName: 'global',
+  scope: 'global',
   initState: STATE,
   reducer,
 })
@@ -404,7 +405,7 @@ state = {
 
 ```
 export connect({
-  scopeName: 'global',
+  scope: 'global',
   initState: {
     list: [],
   },
@@ -416,7 +417,7 @@ export connect({
 
 ```
 export connect({
-  scopeName: 'global',
+  scope: 'global',
   initState: Immutable.Map({
     list: [],
   }),
