@@ -32,9 +32,9 @@ interface Options {
   log?: boolean;
 }
 
-export const RxStore = new RxStoreFactory();
+const RxStore = new RxStoreFactory();
 
-export function connect(options: Options) {
+function connect(options: Options) {
   if (options.scope) {
     options.scopeName = options.scope;
   }
@@ -202,4 +202,9 @@ export function connect(options: Options) {
       }
     };
   };
+}
+
+export {
+  connect,
+  RxStore,
 }

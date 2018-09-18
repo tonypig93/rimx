@@ -6,7 +6,7 @@ export default {
   input: 'src/index.ts',
   output: {
     file: 'dist/rimx.js',
-    format: 'es',
+    format: 'umd',
     name: 'rimx',
   },
   plugins: [
@@ -19,5 +19,5 @@ export default {
       tsconfig: 'tsconfig.json',
     }),
   ],
-  external: id => /(react|immutable|rxjs)/.test(id)
+  external: id => /^(react|immutable|rxjs)/.test(id)
 }
