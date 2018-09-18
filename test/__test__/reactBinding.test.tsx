@@ -1,28 +1,38 @@
 import * as React from 'react';
 import * as renderer from 'react-test-renderer';
+import 'rxjs/add/operator/mapTo';
 import { connect } from '../../src/reactBinding';
 import { combineReducers } from '../../src/base/combineReducers';
 
 let Root$;
 
 class Root extends React.Component<any, any> {
-  handleChangeState = () => {
-    this.props.dispatch({ type: 'changeName', payload: 'tom' });
+  handleClick = () => {
+    this.props.handler && this.props.handler.call(this);
   }
   render() {
     return (
-      <div onClick={this.handleChangeState}>{this.props.name}</div>
+      <div onClick={this.handleClick}>{this.props.name}</div>
     )
   }
 }
 
-class Another extends React.Component<any, any> {
+class A extends React.Component<any, any> {
+  componentDidMount() {
+    this.props.didMount && this.props.didMount.call(this);
+  }
+
+  handleClick = () => {
+    this.props.handler && this.props.handler.call(this);
+  }
+
   render() {
     return (
-      <div>{this.props.name}</div>
+      <div onClick={this.handleClick}>{this.props.name}</div>
     )
   }
 }
+
 
 beforeEach(() => {
   Root$ = connect({
@@ -38,9 +48,9 @@ beforeEach(() => {
   })(Root);
 })
 
-function reducer1() {
+function reducer1(state, action) {
   return {
-    name: 'tom',
+    name: action.payload,
   };
 }
 
@@ -51,9 +61,12 @@ const reducer = combineReducers({
 describe('React bindings', () => {
   test('create a scope with a component', () => {
     expect(Root$.name).toBe('ConnectedComponent');
+    function handler() {
+      this.props.dispatch({ type: 'changeName', payload: 'tom' });
+    }
 
     const component = renderer.create(
-      <Root$></Root$>
+      <Root$ handler={handler}></Root$>
     );
 
     let tree = component.toJSON();
@@ -65,18 +78,21 @@ describe('React bindings', () => {
   })
 
   test('make a component link to the scope', () => {
-    const Another$ = connect({
+    function handler() {
+      this.props.dispatch({ type: 'changeName', payload: 'tom' });
+    }
+    const A$ = connect({
       connectScopes: {
         test: 'name',
       },
-    })(Another);
+    })(A);
 
     const component_r = renderer.create(
-      <Root$></Root$>
+      <Root$ handler={handler}></Root$>
     );
 
     const component_a = renderer.create(
-      <Another$></Another$>
+      <A$></A$>
     );
 
     let tree_r = component_r.toJSON();
@@ -94,4 +110,125 @@ describe('React bindings', () => {
     expect(tree_a).toMatchSnapshot();
 
   });
+
+  test('change the state directly', () => {
+    function handler() {
+      this.props.controller.next(() => {
+        return {
+          name: 'eric',
+        };
+      });
+    }
+    const A$ = connect({
+      connectScopes: {
+        test: 'name',
+      },
+    })(A);
+
+    const component_r = renderer.create(
+      <Root$></Root$>
+    );
+
+    const component = renderer.create(
+      <A$ handler={handler}></A$>
+    );
+
+    let tree = component.toJSON();
+    expect(tree).toMatchSnapshot();
+
+    tree.props.onClick();
+
+    tree = component.toJSON();
+    expect(tree).toMatchSnapshot();
+  })
+
+  test('listen state change', () => {
+    class B extends React.Component<any, any> {
+      state = {
+        name: '',
+      }
+      componentDidMount() {
+        this.props.listen(['name']).do(data => {
+          this.setState({
+            name: data,
+          });
+        })
+      }
+      handleClick = () => {
+        this.props.dispatch({ type: 'changeName', payload: 'mary' });
+      }
+      render() {
+        return (
+          <div onClick={this.handleClick}>{this.state.name}</div>
+        )
+      }
+    }
+    const B$ = connect({
+      connectScopes: {
+        test: null,
+      },
+    })(B);
+
+    const component_r = renderer.create(
+      <Root$></Root$>
+    );
+
+    const component = renderer.create(
+      <B$></B$>
+    );
+
+    let tree = component.toJSON();
+    expect(tree).toMatchSnapshot();
+
+    tree.props.onClick();
+
+    tree = component.toJSON();
+    expect(tree).toMatchSnapshot();
+
+  })
+
+  test('listen state change and using pipe', () => {
+    class B extends React.Component<any, any> {
+      state = {
+        name: '',
+      }
+      componentDidMount() {
+        this.props.listen(['name']).pipe(ob => ob.mapTo('jerry')).do(data => {
+          this.setState({
+            name: data,
+          });
+        })
+      }
+      handleClick = () => {
+        this.props.dispatch({ type: 'changeName', payload: 'mary' });
+      }
+      render() {
+        return (
+          <div onClick={this.handleClick}>{this.state.name}</div>
+        )
+      }
+    }
+    const B$ = connect({
+      connectScopes: {
+        test: null,
+      },
+    })(B);
+
+    const component_r = renderer.create(
+      <Root$></Root$>
+    );
+
+    const component = renderer.create(
+      <B$></B$>
+    );
+
+    let tree = component.toJSON();
+    expect(tree).toMatchSnapshot();
+
+    tree.props.onClick();
+
+    tree = component.toJSON();
+    expect(tree).toMatchSnapshot();
+
+  })
 })

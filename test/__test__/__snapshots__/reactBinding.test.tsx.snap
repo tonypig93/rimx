@@ -1,5 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`React bindings change the state directly 1`] = `
+<div
+  onClick={[Function]}
+>
+  tony
+</div>
+`;
+
+exports[`React bindings change the state directly 2`] = `
+<div
+  onClick={[Function]}
+>
+  eric
+</div>
+`;
+
 exports[`React bindings create a scope with a component 1`] = `
 <div
   onClick={[Function]}
@@ -16,6 +32,38 @@ exports[`React bindings create a scope with a component 2`] = `
 </div>
 `;
 
+exports[`React bindings listen state change 1`] = `
+<div
+  onClick={[Function]}
+>
+  tony
+</div>
+`;
+
+exports[`React bindings listen state change 2`] = `
+<div
+  onClick={[Function]}
+>
+  mary
+</div>
+`;
+
+exports[`React bindings listen state change and using pipe 1`] = `
+<div
+  onClick={[Function]}
+>
+  jerry
+</div>
+`;
+
+exports[`React bindings listen state change and using pipe 2`] = `
+<div
+  onClick={[Function]}
+>
+  jerry
+</div>
+`;
+
 exports[`React bindings make a component link to the scope 1`] = `
 <div
   onClick={[Function]}
@@ -25,7 +73,9 @@ exports[`React bindings make a component link to the scope 1`] = `
 `;
 
 exports[`React bindings make a component link to the scope 2`] = `
-<div>
+<div
+  onClick={[Function]}
+>
   tony
 </div>
 `;
@@ -39,7 +89,9 @@ exports[`React bindings make a component link to the scope 3`] = `
 `;
 
 exports[`React bindings make a component link to the scope 4`] = `
-<div>
+<div
+  onClick={[Function]}
+>
   tom
 </div>
 `;
