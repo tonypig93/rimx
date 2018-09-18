@@ -10,3 +10,5 @@ docs/
 .travis.yml
 rollup.config.js
 tsconfig.json
+.coveralls.yml
+yarn-error.log
