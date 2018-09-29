@@ -100,15 +100,15 @@
          * @returns
          * @memberof ControlledSubject
          */
-        ScopeController.prototype.subscribe = function (observer, key, mapper) {
+        ScopeController.prototype.subscribe = function (observer, key, force, mapper) {
+            if (force === void 0) { force = false; }
             // root.takeSnapshot();
             var observable = this.stateObservable;
             if (key) {
                 observable = observable
-                    .map(function (d) { return d.getIn(key); })
-                    .distinctUntilChanged(compareFn);
+                    .map(function (d) { return d.getIn(key); });
             }
-            else {
+            if (!force) {
                 observable = observable.distinctUntilChanged(compareFn);
             }
             if (mapper) {
@@ -348,12 +348,12 @@
                         _this.controllerSet[key] = _this.bindListener(scopeController);
                     });
                 };
-                ConnectedComponent.prototype.bindListener = function (subject) {
-                    var bindedController = subject;
-                    bindedController.listen = function (key) {
+                ConnectedComponent.prototype.bindListener = function (controller) {
+                    var bindedController = controller;
+                    bindedController.listen = function (key, force) {
                         var _mapper;
                         var _do = function (observer) {
-                            var subscription = subject.subscribe(observer, key, _mapper);
+                            var subscription = controller.subscribe(observer, key, force, _mapper);
                             return subscription;
                         };
                         function pipe(mapper) {
@@ -398,7 +398,7 @@
                     var _this = this;
                     if (path === void 0) { path = [name]; }
                     this.stateToPropsNames.push(name);
-                    subject.listen(normalizePath(path)).do(function (d) {
+                    subject.listen(normalizePath(path), false).do(function (d) {
                         var _a;
                         _this.setState((_a = {},
                             _a[name] = d,

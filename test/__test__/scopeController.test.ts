@@ -117,6 +117,34 @@ describe('ScopeController', () => {
     );
   });
 
+  test('subscribe with force=false', done => {
+    const fn = jest.fn();
+    const controller = store.getScopeController(scopeName);
+    controller.subscribe(fn, ['text'], false, ob => ob.finally(() => {
+      expect(fn.mock.calls.length).toBe(1);
+      done();
+    }));
+
+    controller.next(() => ({ text: 'hello' }));
+    setTimeout(() => {
+      controller.destroy();
+    }, 100);
+  })
+
+  test('subscribe with force=ture', done => {
+    const fn = jest.fn();
+    const controller = store.getScopeController(scopeName);
+    controller.subscribe(fn, ['text'], true, ob => ob.finally(() => {
+      expect(fn.mock.calls.length).toBe(2);
+      done();
+    }));
+
+    controller.next(() => ({ text: 'hello' }));
+    setTimeout(() => {
+      controller.destroy();
+    }, 100);
+  })
+
   test('subscription listeners in store', () => {
     const controller = store.getScopeController(scopeName);
     controller.subscribe(data => {}, ['text']);

@@ -9,7 +9,8 @@ import { Reducer, Action } from './base/types';
 
 interface ReactScopeController extends ScopeController {
   listen?: (
-    key: string[]
+    key: string[],
+    force: boolean,
   ) => {
     do: (observer) => Subscription;
     pipe: (
@@ -102,13 +103,13 @@ function connect(options: Options) {
           });
       }
 
-      bindListener(subject: ScopeController) {
-        const bindedController: ReactScopeController = subject;
-        bindedController.listen = key => {
+      bindListener(controller: ScopeController) {
+        const bindedController: ReactScopeController = controller;
+        bindedController.listen = (key, force) => {
           let _mapper;
 
           const _do = observer => {
-            const subscription = subject.subscribe(observer, key, _mapper);
+            const subscription = controller.subscribe(observer, key, force, _mapper);
             return subscription;
           };
 
@@ -155,7 +156,7 @@ function connect(options: Options) {
 
       listenState(subject: ReactScopeController, name: string, path = [name]) {
         this.stateToPropsNames.push(name);
-        subject.listen(normalizePath(path)).do(d => {
+        subject.listen(normalizePath(path), false).do(d => {
           this.setState({
             [name]: d
           });

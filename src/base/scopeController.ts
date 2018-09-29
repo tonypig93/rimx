@@ -43,16 +43,17 @@ export class ScopeController {
   subscribe(
     observer,
     key: string[],
-    mapper?: (ob: Observable<any>) => Observable<any>
+    force: boolean = false,
+    mapper?: (ob: Observable<any>) => Observable<any>,
   ) {
     // root.takeSnapshot();
     let observable = this.stateObservable;
     if (key) {
       observable = observable
-        .map(d => d.getIn(key))
-        .distinctUntilChanged(compareFn);
-    } else {
-      observable = observable.distinctUntilChanged(compareFn);
+        .map(d => d.getIn(key));
+    }
+    if (!force) {
+      observable = observable.distinctUntilChanged(compareFn)
     }
     if (mapper) {
       observable = mapper(observable);
