@@ -121,6 +121,48 @@ describe('React bindings', () => {
     component_a.unmount();
   });
 
+  test('make a component link to the scope and using selector', () => {
+    function handler() {
+      this.props.dispatch({ type: 'changeName', payload: 'tom' });
+    }
+    const A$ = connect({
+      connectScopes: {
+        test: {
+          propName: 'name',
+          path: 'name',
+          selector: (value) => {
+            return `${value}_${value}`;
+          },
+        },
+      },
+    })(A);
+
+    const component_r = renderer.create(
+      <Root$ handler={handler}></Root$>
+    );
+
+    const component_a = renderer.create(
+      <A$></A$>
+    );
+
+    let tree_r = component_r.toJSON();
+    expect(tree_r).toMatchSnapshot();
+
+    let tree_a = component_a.toJSON();
+    expect(tree_a).toMatchSnapshot();
+
+    tree_r.props.onClick();
+
+    tree_r = component_r.toJSON();
+    expect(tree_r).toMatchSnapshot();
+
+    tree_a = component_a.toJSON();
+    expect(tree_a).toMatchSnapshot();
+
+    component_r.unmount();
+    component_a.unmount();
+  });
+
   test('make a component link to the scope and get two props', () => {
 
     class B extends React.Component<any, any> {

@@ -379,7 +379,7 @@
                                 _this.listenState(controller, toCamelcase(mapProps));
                             }
                             else if (isPlainObject(mapProps)) {
-                                _this.listenState(controller, toCamelcase(mapProps.propName), mapProps.path);
+                                _this.listenState(controller, toCamelcase(mapProps.propName), mapProps.path, mapProps.selector);
                             }
                             else if (Array.isArray(mapProps)) {
                                 mapProps.forEach(function (item) {
@@ -387,18 +387,21 @@
                                         _this.listenState(controller, toCamelcase(item));
                                     }
                                     else if (isPlainObject(item)) {
-                                        _this.listenState(controller, toCamelcase(item.propName), item.path);
+                                        _this.listenState(controller, toCamelcase(item.propName), item.path, item.selector);
                                     }
                                 });
                             }
                         });
                     }
                 };
-                ConnectedComponent.prototype.listenState = function (subject, name, path) {
+                ConnectedComponent.prototype.listenState = function (subject, name, path, selector) {
                     var _this = this;
                     if (path === void 0) { path = [name]; }
                     this.stateToPropsNames.push(name);
-                    subject.listen(normalizePath(path), false).do(function (d) {
+                    subject
+                        .listen(normalizePath(path), false)
+                        .pipe(function (ob) { return selector ? ob.map(selector) : ob; })
+                        .do(function (d) {
                         var _a;
                         _this.setState((_a = {},
                             _a[name] = d,

@@ -14,7 +14,7 @@ interface ReactScopeController extends ScopeController {
   ) => {
     do: (observer) => Subscription;
     pipe: (
-      ob: Observable<any>
+      mapper: (ob: Observable<any>) => Observable<any>
     ) => {
       do: (observer) => Subscription;
     };
@@ -139,14 +139,15 @@ function connect(options: Options) {
               this.listenState(
                 controller,
                 toCamelcase(mapProps.propName),
-                mapProps.path
+                mapProps.path,
+                mapProps.selector,
               );
             } else if (Array.isArray(mapProps)) {
               mapProps.forEach(item => {
                 if (typeof item === 'string') {
                   this.listenState(controller, toCamelcase(item));
                 } else if (isPlainObject(item)) {
-                  this.listenState(controller, toCamelcase(item.propName), item.path);
+                  this.listenState(controller, toCamelcase(item.propName), item.path, item.selector);
                 }
               });
             }
@@ -154,13 +155,16 @@ function connect(options: Options) {
         }
       }
 
-      listenState(subject: ReactScopeController, name: string, path = [name]) {
+      listenState(subject: ReactScopeController, name: string, path = [name], selector?) {
         this.stateToPropsNames.push(name);
-        subject.listen(normalizePath(path), false).do(d => {
-          this.setState({
-            [name]: d
+        subject
+          .listen(normalizePath(path), false)
+          .pipe(ob => selector ? ob.map(selector) : ob)
+          .do(d => {
+            this.setState({
+              [name]: d
+            });
           });
-        });
       }
 
       getPropsInState() {

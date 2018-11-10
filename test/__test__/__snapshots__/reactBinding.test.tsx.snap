@@ -147,3 +147,35 @@ exports[`React bindings make a component link to the scope and get two props 2`]
   </span>
 </div>
 `;
+
+exports[`React bindings make a component link to the scope and using selector 1`] = `
+<div
+  onClick={[Function]}
+>
+  tony
+</div>
+`;
+
+exports[`React bindings make a component link to the scope and using selector 2`] = `
+<div
+  onClick={[Function]}
+>
+  tony_tony
+</div>
+`;
+
+exports[`React bindings make a component link to the scope and using selector 3`] = `
+<div
+  onClick={[Function]}
+>
+  tom
+</div>
+`;
+
+exports[`React bindings make a component link to the scope and using selector 4`] = `
+<div
+  onClick={[Function]}
+>
+  tom_tom
+</div>
+`;
