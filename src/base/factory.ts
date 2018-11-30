@@ -88,7 +88,7 @@ export class RxStoreFactory {
    */
   private _processInject(path: string[], rootState, initialState, merge) {
     return merge
-      ? rootState.mergeDeepIn(path, initialState)
+      ? rootState.updateIn(path, (state) => state.merge(initialState.delete('state')).mergeIn(['state'], initialState.get('state')))
       : rootState.updateIn(path, () => initialState);
   }
   /**

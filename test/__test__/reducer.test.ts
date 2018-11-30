@@ -138,7 +138,6 @@ describe('Reducer: merge', () => {
         age: 18,
         hobbies: ['sports', 'video games'],
         info: {
-          id: 88,
           position: 'CEO',
           salary: 100
         },
