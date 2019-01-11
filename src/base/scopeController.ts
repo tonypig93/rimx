@@ -98,9 +98,11 @@ export class ScopeController {
       console.log(prevScopeState);
     }
     if (nextScopeState.get('state') instanceof Observable) {
-      nextScopeState.get('state').subscribe(_data => {
-        this._updater(nextScopeState.set('state', Immutable.fromJS(_data)), merge, showLog);
-      });
+      nextScopeState.get('state')
+        .takeUntil(this.unsubscribe$)
+        .subscribe(_data => {
+          this._updater(nextScopeState.set('state', Immutable.fromJS(_data)), merge, showLog);
+        });
     } else {
       this._updater(nextScopeState, merge, showLog);
     }
