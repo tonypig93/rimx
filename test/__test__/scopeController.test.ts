@@ -1,5 +1,6 @@
 import * as Immutable from 'immutable';
 import { Observable } from 'rxjs';
+import * as isObservable from 'is-observable';
 import { RxStoreFactory } from '../../src/base/factory';
 import { combineReducers } from '../../src/base/combineReducers';
 

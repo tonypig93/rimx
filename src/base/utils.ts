@@ -1,4 +1,4 @@
-import { is } from 'immutable';
+import * as Immutable from 'immutable';
 
 function isNativeType(variable: any) {
   return (
@@ -13,7 +13,7 @@ export function compareFn(a: any, b: any) {
   if (isNativeType(a) && isNativeType(b)) {
     return Object.is(a, b);
   }
-  return is(a, b);
+  return Immutable.is(a, b);
 }
 
 export function normalizePath(path) {

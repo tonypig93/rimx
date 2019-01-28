@@ -8,6 +8,8 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/takeUntil';
 import * as Immutable from 'immutable';
+import isObservable from 'is-observable';
+
 import { compareFn } from './utils';
 import { Reducer, Action } from './types';
 
@@ -97,7 +99,7 @@ export class ScopeController {
       }
       console.log(prevScopeState);
     }
-    if (nextScopeState.get('state') instanceof Observable) {
+    if (isObservable(nextScopeState.get('state'))) {
       nextScopeState.get('state')
         .takeUntil(this.unsubscribe$)
         .subscribe(_data => {
