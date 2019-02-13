@@ -1,8 +1,10 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('immutable'), require('rxjs/Observable'), require('rxjs/Subject'), require('rxjs/add/operator/map'), require('rxjs/add/operator/distinctUntilChanged'), require('rxjs/add/operator/takeUntil'), require('rxjs/BehaviorSubject'), require('react')) :
-    typeof define === 'function' && define.amd ? define(['exports', 'immutable', 'rxjs/Observable', 'rxjs/Subject', 'rxjs/add/operator/map', 'rxjs/add/operator/distinctUntilChanged', 'rxjs/add/operator/takeUntil', 'rxjs/BehaviorSubject', 'react'], factory) :
-    (factory((global.rimx = {}),global.Immutable,global.Observable,global.Subject,null,null,null,global.BehaviorSubject,global.React));
-}(this, (function (exports,Immutable,Observable,Subject,map,distinctUntilChanged,takeUntil,BehaviorSubject,React) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('react-is'), require('immutable'), require('rxjs/Observable'), require('rxjs/Subject'), require('rxjs/add/operator/map'), require('rxjs/add/operator/distinctUntilChanged'), require('rxjs/add/operator/takeUntil'), require('rxjs/BehaviorSubject'), require('react')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'react-is', 'immutable', 'rxjs/Observable', 'rxjs/Subject', 'rxjs/add/operator/map', 'rxjs/add/operator/distinctUntilChanged', 'rxjs/add/operator/takeUntil', 'rxjs/BehaviorSubject', 'react'], factory) :
+    (factory((global.rimx = {}),global.reactIs,global.Immutable,global.Observable,global.Subject,null,null,null,global.BehaviorSubject,global.React));
+}(this, (function (exports,reactIs,Immutable,Observable,Subject,map,distinctUntilChanged,takeUntil,BehaviorSubject,React) { 'use strict';
+
+    reactIs = reactIs && reactIs.hasOwnProperty('default') ? reactIs['default'] : reactIs;
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -43,6 +45,118 @@
         };
         return __assign.apply(this, arguments);
     };
+
+    function __rest(s, e) {
+        var t = {};
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+            t[p] = s[p];
+        if (s != null && typeof Object.getOwnPropertySymbols === "function")
+            for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+                t[p[i]] = s[p[i]];
+        return t;
+    }
+
+    /**
+     * Copyright 2015, Yahoo! Inc.
+     * Copyrights licensed under the New BSD License. See the accompanying LICENSE file for terms.
+     */
+
+    var REACT_STATICS = {
+        childContextTypes: true,
+        contextType: true,
+        contextTypes: true,
+        defaultProps: true,
+        displayName: true,
+        getDefaultProps: true,
+        getDerivedStateFromError: true,
+        getDerivedStateFromProps: true,
+        mixins: true,
+        propTypes: true,
+        type: true
+    };
+
+    var KNOWN_STATICS = {
+        name: true,
+        length: true,
+        prototype: true,
+        caller: true,
+        callee: true,
+        arguments: true,
+        arity: true
+    };
+
+    var FORWARD_REF_STATICS = {
+        '$$typeof': true,
+        render: true,
+        defaultProps: true,
+        displayName: true,
+        propTypes: true
+    };
+
+    var MEMO_STATICS = {
+        '$$typeof': true,
+        compare: true,
+        defaultProps: true,
+        displayName: true,
+        propTypes: true,
+        type: true
+    };
+
+    var TYPE_STATICS = {};
+    TYPE_STATICS[reactIs.ForwardRef] = FORWARD_REF_STATICS;
+
+    function getStatics(component) {
+        if (reactIs.isMemo(component)) {
+            return MEMO_STATICS;
+        }
+        return TYPE_STATICS[component['$$typeof']] || REACT_STATICS;
+    }
+
+    var defineProperty = Object.defineProperty;
+    var getOwnPropertyNames = Object.getOwnPropertyNames;
+    var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+    var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+    var getPrototypeOf = Object.getPrototypeOf;
+    var objectPrototype = Object.prototype;
+
+    function hoistNonReactStatics(targetComponent, sourceComponent, blacklist) {
+        if (typeof sourceComponent !== 'string') {
+            // don't hoist over string (html) components
+
+            if (objectPrototype) {
+                var inheritedComponent = getPrototypeOf(sourceComponent);
+                if (inheritedComponent && inheritedComponent !== objectPrototype) {
+                    hoistNonReactStatics(targetComponent, inheritedComponent, blacklist);
+                }
+            }
+
+            var keys = getOwnPropertyNames(sourceComponent);
+
+            if (getOwnPropertySymbols) {
+                keys = keys.concat(getOwnPropertySymbols(sourceComponent));
+            }
+
+            var targetStatics = getStatics(targetComponent);
+            var sourceStatics = getStatics(sourceComponent);
+
+            for (var i = 0; i < keys.length; ++i) {
+                var key = keys[i];
+                if (!KNOWN_STATICS[key] && !(blacklist && blacklist[key]) && !(sourceStatics && sourceStatics[key]) && !(targetStatics && targetStatics[key])) {
+                    var descriptor = getOwnPropertyDescriptor(sourceComponent, key);
+                    try {
+                        // Avoid failures from read-only properties
+                        defineProperty(targetComponent, key, descriptor);
+                    } catch (e) {}
+                }
+            }
+
+            return targetComponent;
+        }
+
+        return targetComponent;
+    }
+
+    var hoistNonReactStatics_cjs = hoistNonReactStatics;
 
     function isNativeType(variable) {
         return (typeof variable === 'string' ||
@@ -299,7 +413,7 @@
             options.scopeName = options.scope;
         }
         return function wrap(WrappedComponent) {
-            return /** @class */ (function (_super) {
+            var ConnectedComponent = /** @class */ (function (_super) {
                 __extends(ConnectedComponent, _super);
                 function ConnectedComponent(props, context) {
                     var _this = _super.call(this, props, context) || this;
@@ -435,10 +549,18 @@
                     return props;
                 };
                 ConnectedComponent.prototype.render = function () {
-                    return (React.createElement(WrappedComponent, __assign({}, this.getPropsInState(), this.getInjectProps(), this.props)));
+                    var _a = this.props, forwardedRef = _a.forwardedRef, restProps = __rest(_a, ["forwardedRef"]);
+                    return (React.createElement(WrappedComponent, __assign({ ref: forwardedRef }, this.getPropsInState(), this.getInjectProps(), restProps)));
                 };
                 return ConnectedComponent;
             }(React.Component));
+            if (options.forwardRef) {
+                var forwarded = React.forwardRef(function forwardConnectRef(props, ref) {
+                    return React.createElement(ConnectedComponent, __assign({}, props, { forwardedRef: ref }));
+                });
+                return hoistNonReactStatics_cjs(forwarded, WrappedComponent);
+            }
+            return hoistNonReactStatics_cjs(ConnectedComponent, WrappedComponent);
         };
     }
 
