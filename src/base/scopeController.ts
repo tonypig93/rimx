@@ -8,9 +8,8 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/operator/takeUntil';
 import * as Immutable from 'immutable';
-import isObservable from 'is-observable';
 
-import { compareFn } from './utils';
+import { compareFn, isObservable } from './utils';
 import { Reducer, Action } from './types';
 
 export class ScopeController {

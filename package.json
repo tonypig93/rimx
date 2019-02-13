@@ -29,7 +29,7 @@
   "homepage": "https://github.com/tonypig93/rimx#readme",
   "dependencies": {
     "hoist-non-react-statics": "^3.3.0",
-    "is-observable": "^1.1.0"
+    "symbol-observable": "^1.2.0"
   },
   "peerDependencies": {
     "immutable": "^3.8.0",

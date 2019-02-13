@@ -1,4 +1,5 @@
 import * as Immutable from 'immutable';
+import symbolObservable from 'symbol-observable';
 
 function isNativeType(variable: any) {
   return (
@@ -34,4 +35,8 @@ export function isPlainObject(value) {
 
 export function toCamelcase(value) {
   return value.replace(/-([a-z])/gi, (all, letter) => letter.toUpperCase());
+}
+
+export function isObservable(value) {
+  return Boolean(value && value[symbolObservable] && value === value[symbolObservable]());
 }
