@@ -13,8 +13,6 @@ export default {
     resolve({
       customResolveOptions: {
         moduleDirectory: 'node_modules',
-        jsnext: true,
-        main: true,
       },
     }),
     typescript({
@@ -22,7 +20,8 @@ export default {
       rollupCommonJSResolveHack: true,
     }),
     commonjs({
-      include: 'node_modules/**',  // Default: undefined
+      include: /node_modules/,  // Default: undefined
+      exclude: /node_modules\/symbol-observable/,
       // search for files other than .js files (must already
       // be transpiled by a previous plugin!)
       extensions: [ '.js' ],  // Default: [ '.js' ]
