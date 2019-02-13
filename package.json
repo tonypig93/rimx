@@ -27,7 +27,10 @@
     "url": "https://github.com/tonypig93/rimx/issues"
   },
   "homepage": "https://github.com/tonypig93/rimx#readme",
-  "dependencies": {},
+  "dependencies": {
+    "hoist-non-react-statics": "^3.3.0",
+    "is-observable": "^1.1.0"
+  },
   "peerDependencies": {
     "immutable": "^3.8.0",
     "react": "^0.14.0 || ^15.0.0 || ^16.0.0",

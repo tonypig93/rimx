@@ -1,4 +1,5 @@
 import * as React from 'react';
+import hoistStatics from 'hoist-non-react-statics';
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 
@@ -211,12 +212,12 @@ function connect(options: Options) {
         props,
         ref
       ) {
-        return <WrappedComponent {...props} forwardedRef={ref} />
+        return <ConnectedComponent {...props} forwardedRef={ref} />
       });
-      return forwarded;
+      return hoistStatics(forwarded, WrappedComponent);
     }
     
-    return ConnectedComponent;
+    return hoistStatics(ConnectedComponent, WrappedComponent);
   };
 }
 
