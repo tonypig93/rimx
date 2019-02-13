@@ -31,6 +31,7 @@ interface Options {
   reducer?: Reducer;
   cache?: boolean;
   log?: boolean;
+  forwardRef?: boolean;
 }
 
 const RxStore = new RxStoreFactory();
@@ -40,7 +41,7 @@ function connect(options: Options) {
     options.scopeName = options.scope;
   }
   return function wrap(WrappedComponent) {
-    return class ConnectedComponent extends React.Component<any, any> {
+    class ConnectedComponent extends React.Component<any, any> {
       controllerSet: { [key: string]: ReactScopeController } = {};
       state = {};
       isConnected = false;
@@ -197,15 +198,29 @@ function connect(options: Options) {
       }
 
       render() {
+        const { forwardedRef, ...restProps } = this.props;
         return (
           <WrappedComponent
+            ref={forwardedRef}
             {...this.getPropsInState()}
             {...this.getInjectProps()}
-            {...this.props}
+            {...restProps}
           />
         );
       }
     };
+
+    if (options.forwardRef) {
+      const forwarded = React.forwardRef(function forwardConnectRef(
+        props,
+        ref
+      ) {
+        return <WrappedComponent {...props} forwardedRef={ref} />
+      });
+      return forwarded;
+    }
+    
+    return ConnectedComponent;
   };
 }
 
