@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/tonypig93/rimx#readme",
   "dependencies": {
+    "hoist-non-react-statics": "^3.3.0",
     "is-observable": "^1.1.0"
   },
   "peerDependencies": {

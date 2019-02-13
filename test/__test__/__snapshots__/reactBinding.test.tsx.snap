@@ -32,6 +32,22 @@ exports[`React bindings create a scope with a component 2`] = `
 </div>
 `;
 
+exports[`React bindings get the ref of child component 1`] = `
+<div
+  onClick={[Function]}
+>
+  tony
+</div>
+`;
+
+exports[`React bindings get the ref of child component 2`] = `
+<div
+  onClick={[Function]}
+>
+  tom
+</div>
+`;
+
 exports[`React bindings listen state change 1`] = `
 <div
   onClick={[Function]}

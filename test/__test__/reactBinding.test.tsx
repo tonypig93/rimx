@@ -435,4 +435,34 @@ describe('React bindings', () => {
     expect(RxStore.store.observers.length).toBe(1);
 
   })
+
+  test('get the ref of child component', () => {
+    const A$ = connect({
+      connectScopes: {
+        test: 'name',
+      },
+      forwardRef: true,
+    })(A);
+
+    const childRef = React.createRef();
+    function handler() {
+      if (childRef.current) {
+        this.props.dispatch({ type: 'changeName', payload: 'tom' });
+      }
+    }
+
+    const component = renderer.create(
+      <A$ handler={handler} ref={childRef}></A$>
+    );
+
+    let tree = component.toJSON();
+    expect(tree).toMatchSnapshot();
+
+    tree.props.onClick();
+
+    tree = component.toJSON();
+    expect(tree).toMatchSnapshot();
+
+    component.unmount();
+  })
 })
