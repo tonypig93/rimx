@@ -6,7 +6,7 @@
 
 A state management tool for React, based on RxJS and ImmutableJS.
 
-`RimX`是一个类似`redux`的状态管理工具，不同的是`RimX`没有`action` `reducer`等概念，使用起来较为简单。你可以利用`RxJS`强大的流处理能力来管理`react`组件的状态变化，另一方面`ImmutableJS`可以使状态更新变的更简单。
+`RimX`是一个类似`redux`的状态管理工具，使用起来较为简单。你可以利用`RxJS`强大的流处理能力来管理`react`组件的状态变化，另一方面`ImmutableJS`可以使状态更新变的更简单。
 `RimX`本身是个小巧的库，`gzip`后仅3KB，本身提供了`react`集成。
 
 # 依赖
@@ -351,7 +351,7 @@ export connect({
 })
 ```
 
-以上代码只要用过`redux`基本都看得懂，这里需要特别指出的是关于`reducer`的返回值。默认情况下，`rimx`使用`ImmutableJS`的`mergeDeepIn`来合并前后两个状态，因此修改一个基本类型的值时，只需提供包含修改部分的对象（或者是`Immutable`结构）即可。
+以上代码只要用过`redux`基本都看得懂，这里需要特别指出的是关于`reducer`的返回值。默认情况下，`rimx`使用`ImmutableJS`的`merge`来合并前后两个状态，注意`merge`是浅合并，因此修改一个基本类型的值时，只需提供包含修改部分的对象（或者是`Immutable`结构）即可。
 
 ```
 // 修改前
